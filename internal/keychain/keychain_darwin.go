@@ -1,4 +1,4 @@
-//go:build darwin && !keychain_biometric
+//go:build darwin && cgo && !keychain_biometric
 
 package keychain
 
