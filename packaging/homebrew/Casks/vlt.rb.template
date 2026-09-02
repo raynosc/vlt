@@ -8,7 +8,11 @@ cask "vlt" do
   homepage "https://github.com/raynosc/vlt"
 
   app "vlt.app"
-  binary "#{appdir}/vlt.app/Contents/MacOS/vlt"
+  binary "#{appdir}/vlt.app/Contents/MacOS/vlt", target: "vlt-gui"
+  binary "#{appdir}/vlt.app/Contents/MacOS/vlt-cli", target: "vlt"
+  binary "#{appdir}/vlt.app/Contents/MacOS/vlt-tui", target: "vlt-tui"
+  binary "#{appdir}/vlt.app/Contents/MacOS/vlt-quick", target: "vlt-quick"
+  binary "#{appdir}/vlt.app/Contents/MacOS/vlt-sync", target: "vlt-sync"
 
   postflight do
     system_command "xattr",
