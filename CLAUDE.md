@@ -70,3 +70,12 @@ For specialized domain knowledge, consult the skills in `.agents/skills/`:
 - [vlt-architecture](file:///.agents/skills/vlt-architecture/SKILL.md): Core cryptographic flow, SQLite schema v7, and GUI/TUI layers.
 - [vlt-security-auditing](file:///.agents/skills/vlt-security-auditing/SKILL.md): Memory hygiene rules, sanitization, and Watchtower audits.
 - [vlt-sync-ops](file:///.agents/skills/vlt-sync-ops/SKILL.md): `vlt-sync` server operations, mTLS PKI setup, and SSE events.
+
+---
+
+## 5. Mandatory PR Security Review Protocol (Human-in-the-Loop)
+
+When evaluating or reviewing any Pull Request:
+1. **Security First**: Verify zero-knowledge invariants (no plaintext in DB/logs/argv), strict memory zeroization (`crypto.Zeroize`), and safe dependencies.
+2. **Functionality Second**: Verify `make check` passes with 0 lint errors and all unit tests green.
+3. **Human Approval Required**: Always report the structured audit verdict to the human user first. **NEVER** approve, merge, close, or comment on the PR on GitHub without explicit user approval. Always STOP and await human confirmation.

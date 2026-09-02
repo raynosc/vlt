@@ -8,3 +8,4 @@ You are contributing to `vlt`, a production-grade, local-first, zero-knowledge s
 3. **Platform Build Tags**: OS-specific code (e.g. CGo Carbon) MUST have `//go:build <os>` and a fallback stub `_other.go` for Linux/Windows headless environments.
 4. **Argv Security**: Never pass passwords as CLI argument flags; use stdin pipes.
 5. **Quality Verification**: Always run `make check` after code modifications to ensure 0 lint errors and 100% test pass.
+6. **PR Review Protocol (Human-in-the-Loop)**: When reviewing PRs, evaluate Security first, Functionality second. Always present findings to the human user first. NEVER approve or merge PRs without explicit human approval.

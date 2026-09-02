@@ -68,3 +68,26 @@ When adding or modifying crypto, store, sync, or parsers:
    - `make check` (Lint + Gosec + Tests).
    - `make fuzz` (Fuzzing).
    - `make ci` (Race detector + Govulncheck).
+
+---
+
+## 6. Pull Request (PR) Security Review Checklist
+
+Every PR must be evaluated against this checklist in order:
+
+### Phase 1: Security Audit (BLOCKER)
+- [ ] **Zero-Leakage Invariant**: No plaintext passwords, keys, or recovery words stored in DB columns, logs, stderr/stdout, sync payloads, or CLI args (`argv`).
+- [ ] **Memory Hygiene**: Every sensitive buffer has `defer crypto.Zeroize(buf)` or `crypto.Zeroize(buf)`.
+- [ ] **Dependency & Supply Chain**: No unnecessary external packages; no hidden network calls or telemetry.
+- [ ] **Injection Prevention**: No unsanitized strings in shell execution, SQLite queries, or regex.
+- [ ] **Cryptographic Primitives**: No weak algorithms (MD5, SHA1, DES); AES-GCM nonces must always be 12 bytes randomly generated via `crypto/rand`.
+- [ ] **Timing-Attack Resistance**: Authentication and token comparison use `subtle.ConstantTimeCompare`.
+
+### Phase 2: Functional Audit
+- [ ] `make check` passes with 0 lint errors and all unit tests green.
+- [ ] Backward compatibility with SQLite Schema v7 preserved.
+- [ ] Multi-platform build tags (`//go:build`) and stubs intact.
+
+### Phase 3: Human Reporting & Stop Invariant
+- [ ] Present structured summary to the human user (Security Verdict, Functional Verdict, Scan Results).
+- [ ] **STOP AND WAIT**: The agent MUST NEVER approve, merge, or close PRs on GitHub autonomously. Human approval is mandatory.

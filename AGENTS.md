@@ -145,9 +145,34 @@ docker compose up -d
 
 ---
 
-## 6. Skills & Extended Guides (`.agents/skills/`)
+## 7. Skills & Extended Guides (`.agents/skills/`)
 
 For specialized workflows, check the skills in `.agents/skills/`:
 * [vlt-architecture](file:///.agents/skills/vlt-architecture/SKILL.md) — Deep architectural guide, crypto flow, SQLite schema migrations, and CI quality gates.
 * [vlt-sync-ops](file:///.agents/skills/vlt-sync-ops/SKILL.md) — Deploying, configuring, and testing `vlt-sync` (Docker, Compose, K8s, TLS, SSE).
 * [vlt-security-auditing](file:///.agents/skills/vlt-security-auditing/SKILL.md) — Security rules, memory auditing, and Watchtower checks.
+
+---
+
+## 8. Mandatory PR Security Review Protocol (Human-in-the-Loop)
+
+When reviewing any Pull Request (PR), whether submitted by external contributors or internal branches, the agent MUST strictly execute this security-first review process:
+
+1. **Security-First Evaluation (BEFORE Functionality)**:
+   - **Zero-Knowledge Invariants**: Verify that plaintext secrets, keys, or passwords never reach database columns, log messages, sync payloads, or process arguments (`argv`).
+   - **Memory Sanitation**: Ensure any sensitive `[]byte` slice is strictly zeroized (`defer crypto.Zeroize(...)`).
+   - **Supply-Chain & Injection**: Inspect all newly introduced imports/dependencies, CLI flags, shell executions, and unsafe reflection/CGo blocks.
+   - **Blind Index Integrity**: Ensure schema queries exclusively use HMAC-SHA256 blind indexing (`name_lookup`), never plaintext `WHERE name = ...`.
+   - **Adversarial & Fuzz Tests**: Verify that any parser or cryptographic component includes adversarial test cases and negative boundary checks.
+
+2. **Secondary Evaluation (Functional Correctness)**:
+   - Run `make check` (Lint + Gosec AST + Unit Tests).
+   - Verify backwards compatibility with SQLite Schema v7 and cross-platform build tags (`//go:build`).
+
+3. **Report to Human Before Any Action (MANDATORY)**:
+   - Synthesize and present a structured Security & Functional Audit report directly to the human maintainer:
+     * **Security Verdict**: PASS / WARNING / CRITICAL VULNERABILITY (with exact file and line references).
+     * **Functional Verdict**: PASS / FAIL / REGRESSION RISK.
+     * **Automated Scan Results**: Output of `make check`, `gosec`, and `govulncheck`.
+     * **Summary of Changes**: Concise explanation of what the PR actually introduces.
+   - **STRICT HUMAN-IN-THE-LOOP INVARIANT**: The agent MUST NEVER approve, merge, close, or comment on the PR on GitHub without explicit, unambiguous approval from the human user. Always STOP and await the user's decision.

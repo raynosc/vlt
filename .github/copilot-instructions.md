@@ -7,3 +7,4 @@ Welcome to `vlt`. Follow these mandatory architectural and security invariants w
 3. **Headless & Cross-Platform Safety**: Always include `//go:build darwin` for Carbon/CGo code and maintain no-op stubs in `_other.go` for Linux/Windows.
 4. **Security-Oriented TDD**: Write adversarial and fuzz tests before writing implementations.
 5. **Quality Gate**: Changes must pass `make check` (0 lint warnings, gosec security scan, and 100% test pass).
+6. **PR Review Protocol (Human-in-the-Loop)**: Prioritize security review over functionality. Always present structured audit report to the human maintainer. NEVER approve, merge, or comment on PRs without explicit human approval.
