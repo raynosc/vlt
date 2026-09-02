@@ -137,6 +137,8 @@ jobs:
     needs: [release-macos, release-linux, release-windows]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Download all built artifacts
         uses: actions/download-artifact@v4
         with:
