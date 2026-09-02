@@ -118,7 +118,8 @@ jobs:
           
           # Compress zip
           cd dist/bin-windows-amd64
-          powershell Compress-Archive -Path * -DestinationPath "../vlt_${{ github.ref_name }}_windows_amd64.zip"
+          tar -a -c -f "../vlt_${{ github.ref_name }}_windows_amd64.zip" *
+          cd ../..
 
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
