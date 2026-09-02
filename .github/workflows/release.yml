@@ -235,6 +235,12 @@ cask "vlt" do
   app "vlt.app"
   binary "#{appdir}/vlt.app/Contents/MacOS/vlt"
 
+  postflight do
+    system_command "xattr",
+                   args: ["-d", "com.apple.quarantine", "#{appdir}/vlt.app"],
+                   sudo: false
+  end
+
   zap trash: [
     "~/.config/passwd",
   ]
