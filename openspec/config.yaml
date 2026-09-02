@@ -1,0 +1,53 @@
+schema: spec-driven
+project: vlt
+
+context: |
+  Tech stack: Go 1.26.2, module github.com/raynosc/vlt
+  Architecture: CLI (cobra) + TUI (bubbletea) + GUI (fyne) + sync server
+  Storage: SQLite (modernc.org/sqlite), E2E encrypted vault
+  Crypto: AES-GCM, PBKDF2, golang.org/x/crypto, go-pkcs12
+  Key packages: cli, tui, gui, sync, syncserver, store, crypto, otp, keychain, daemon, parse, secret, quick, watchtower
+  Binaries: vlt, vlt-gui, vlt-tui, vlt-quick, vlt-sync
+  Platform targets: darwin (arm64/amd64), linux (amd64/arm64)
+
+testing:
+  strict_tdd: true
+  test_command: "go test ./..."
+  test_command_verbose: "go test -v -count=1 ./..."
+  test_command_race: "go test -v -count=1 -race ./..."
+  test_command_cover: "go test -v -count=1 -coverprofile=coverage.out ./..."
+  framework: Go testing (stdlib)
+  unit: true
+  integration: true
+  e2e: false
+  coverage: true
+  linter: "go vet ./..."
+  formatter: "go fmt ./..."
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Consider impact on all three frontends (CLI, TUI, GUI)
+    - Flag changes that touch crypto or sync as HIGH RISK
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Security-sensitive changes MUST include threat model section
+  design:
+    - Include sequence diagrams for sync and crypto flows
+    - Document architecture decisions with rationale
+    - Specify build tag requirements (e.g. keychain_biometric)
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+    - Mark tasks touching crypto or sync with [SECURITY] label
+  apply:
+    - Follow existing code patterns
+    tdd: true
+    test_command: "go test ./..."
+  verify:
+    test_command: "go test ./..."
+    build_command: "go build ./..."
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas

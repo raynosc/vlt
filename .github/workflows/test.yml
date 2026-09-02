@@ -1,0 +1,113 @@
+name: CI & Security Quality Gate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "Makefile"
+      - ".golangci.yml"
+      - ".github/workflows/test.yml"
+      - "build/**"
+      - "cmd/**"
+      - "internal/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "Makefile"
+      - ".golangci.yml"
+      - ".github/workflows/test.yml"
+      - "build/**"
+      - "cmd/**"
+      - "internal/**"
+
+# gitleaks-action reads PR commits via the API on pull_request events; the
+# default token is contents-only, so grant pull-requests: read explicitly.
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  test:
+    name: Unit Tests & Concurrency Race Detector
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install GUI build deps (Fyne / OpenGL / X11)
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+
+      - name: Format Check (gofmt)
+        run: |
+          if [ -n "$(gofmt -l .)" ]; then
+            echo "The following files are not formatted:"
+            gofmt -l .
+            exit 1
+          fi
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Run Unit Tests with Race Detector
+        run: go test -count=1 -race ./internal/...
+
+      - name: Run Security Mutation Fuzz Tests
+        run: |
+          go test -fuzz=FuzzParseCSV -fuzztime=5s ./internal/parse
+          go test -fuzz=FuzzDetectFormat -fuzztime=5s ./internal/parse
+          go test -fuzz=FuzzUnpackEnvelope -fuzztime=5s ./internal/crypto
+          go test -fuzz=FuzzValidatePINFormat -fuzztime=5s ./internal/crypto
+          go test -fuzz=FuzzMnemonicDecode -fuzztime=5s ./internal/crypto
+          go test -fuzz=FuzzParseHIBPResponse -fuzztime=5s ./internal/watchtower
+
+      - name: Build All Binaries
+        run: go build ./cmd/...
+
+  security:
+    name: Security SAST, Vulnerabilities & Secret Leaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # gitleaks needs full history to resolve the PR commit range
+
+      - name: Install GUI build deps (Fyne / OpenGL / X11)
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+
+      - name: Run govulncheck (Dependency Vulnerabilities)
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
+
+      - name: Run gosec (AST Security Scanner)
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          gosec -quiet -exclude=G101,G103,G104,G115,G117,G204,G304,G402,G505,G703,G705 ./...
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.12.1
+          args: --timeout=5m
+
+      - name: Scan for secrets (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

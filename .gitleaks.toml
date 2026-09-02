@@ -1,0 +1,24 @@
+# Gitleaks configuration for passwd.
+# Extends the built-in default ruleset and records known false positives.
+[extend]
+useDefault = true
+
+[allowlist]
+description = """
+False positives from SDD design/spec prose and a historical code comment that
+list Go crypto key-type identifiers (e.g. package-qualified private-key types),
+which the default generic-api-key rule flags as high-entropy secrets. These are
+documentation, not secrets. We allowlist the historical code commit and exclude
+openspec markdown (design/spec docs) from secret scanning. Actual source code is
+still fully scanned.
+"""
+commits = ["5a0b196eb65796d21216a362f4af45a2233cb7b0"]
+paths = [
+    '''openspec/.*\.md$''',
+    '''coverage\.html$''',
+    '''.*\.html$''',
+]
+regexes = [
+    '''secret=REDACTED''',
+    '''GEZDGNBVGY3TQOJQ''',
+]

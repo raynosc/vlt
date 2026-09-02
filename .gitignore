@@ -1,0 +1,75 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/vlt
+/vlt.exe
+cmd/vlt/vlt
+cmd/vlt/vlt.exe
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of go coverage
+*.out
+*.prof
+coverage.html
+*.html
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Dependency directories
+vendor/
+
+# Build output
+dist/
+build/
+/vlt
+/vlt-tui
+/vlt-quick
+/vlt-gui
+/vlt-sync
+/vlt-*-*
+
+# Compiled binaries directory
+bin/
+
+# Security: sensitive files that must never be committed
+recovery-kit.txt
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+daemon.sock
+vlt-export.*
+*.p12
+*.pfx
+*.pem
+*.key
+*.cer
+*.crt
+# Local Pi runtime state
+.atl/
+.pi/
+.pi-lens/
+
+# Local Claude Code settings
+.claude/settings.local.json
+.codebase-memory/
+*.tar.gz
+
+# Local PRDs and packaging guides
+PRD-*.md
+MACOS-*.md

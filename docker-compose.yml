@@ -1,0 +1,23 @@
+services:
+  vlt-sync:
+    build: .
+    image: vlt-sync:latest
+    container_name: vlt-sync
+    restart: unless-stopped
+    ports:
+      - "8443:8443"
+    environment:
+      - VLT_SYNC_ADDR=:8443
+      - VLT_SYNC_DB_PATH=/data/sync.db
+      - VLT_SYNC_TLS_CERT=/certs/server.pem
+      - VLT_SYNC_TLS_KEY=/certs/server-key.pem
+      - VLT_SYNC_TLS_CLIENT_CA=/certs/ca.pem
+    volumes:
+      - ./data:/data
+      - ./certs:/certs:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -k -f https://localhost:8443/healthz || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

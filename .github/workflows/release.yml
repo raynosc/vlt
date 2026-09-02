@@ -1,0 +1,155 @@
+name: Release Multi-Platform Packages
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # macOS Build & Package (.dmg + CLI binaries)
+  # ─────────────────────────────────────────────────────────────
+  release-macos:
+    name: Build macOS (ARM64 & x86_64)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+
+      - name: Install Fyne CLI
+        run: go install fyne.io/fyne/v2/cmd/fyne@v2.7.3
+
+      - name: Build CLI binaries (Universal / ARM64 & AMD64)
+        run: |
+          mkdir -p dist/bin-darwin-arm64 dist/bin-darwin-amd64
+          # ARM64
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-arm64/vlt ./cmd/vlt
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-arm64/vlt-tui ./cmd/vlt-tui
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-arm64/vlt-quick ./cmd/vlt-quick
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-arm64/vlt-sync ./cmd/vlt-sync
+          tar -czvf "dist/vlt_${{ github.ref_name }}_darwin_arm64.tar.gz" -C dist/bin-darwin-arm64 .
+
+          # AMD64
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-amd64/vlt ./cmd/vlt
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-amd64/vlt-tui ./cmd/vlt-tui
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-amd64/vlt-quick ./cmd/vlt-quick
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-amd64/vlt-sync ./cmd/vlt-sync
+          tar -czvf "dist/vlt_${{ github.ref_name }}_darwin_amd64.tar.gz" -C dist/bin-darwin-amd64 .
+
+      - name: Package macOS GUI Application (.app / .dmg)
+        run: |
+          fyne package -os darwin -src ./cmd/vlt-gui -name "vlt" -appID "com.passwd.vlt" -appVersion "${{ github.ref_name }}" -icon internal/gui/assets/icon-128.png
+          # Move generated .dmg / .app to dist
+          mv *.dmg "dist/vlt_${{ github.ref_name }}_Darwin.dmg" || mv *.app dist/ || true
+
+      - name: Upload macOS Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-artifacts
+          path: dist/*
+
+  # ─────────────────────────────────────────────────────────────
+  # Linux Build & Package (.tar.gz)
+  # ─────────────────────────────────────────────────────────────
+  release-linux:
+    name: Build Linux (x86_64 & ARM64)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install GUI dependencies
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+
+      - name: Build Linux Binaries
+        run: |
+          mkdir -p dist/bin-linux-amd64
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-linux-amd64/vlt ./cmd/vlt
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-linux-amd64/vlt-gui ./cmd/vlt-gui
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-linux-amd64/vlt-tui ./cmd/vlt-tui
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-linux-amd64/vlt-quick ./cmd/vlt-quick
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-linux-amd64/vlt-sync ./cmd/vlt-sync
+          tar -czvf "dist/vlt_${{ github.ref_name }}_linux_amd64.tar.gz" -C dist/bin-linux-amd64 .
+
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-artifacts
+          path: dist/*.tar.gz
+
+  # ─────────────────────────────────────────────────────────────
+  # Windows Build & Package (.zip)
+  # ─────────────────────────────────────────────────────────────
+  release-windows:
+    name: Build Windows (x86_64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+
+      - name: Build Windows Binaries
+        shell: bash
+        run: |
+          mkdir -p dist/bin-windows-amd64
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-windows-amd64/vlt.exe ./cmd/vlt
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -H=windowsgui -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-windows-amd64/vlt-gui.exe ./cmd/vlt-gui
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-windows-amd64/vlt-tui.exe ./cmd/vlt-tui
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -H=windowsgui -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-windows-amd64/vlt-quick.exe ./cmd/vlt-quick
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/passwd/internal/version.Version=${{ github.ref_name }}" -o dist/bin-windows-amd64/vlt-sync.exe ./cmd/vlt-sync
+          
+          # Compress zip
+          cd dist/bin-windows-amd64
+          powershell Compress-Archive -Path * -DestinationPath "../vlt_${{ github.ref_name }}_windows_amd64.zip"
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-artifacts
+          path: dist/*.zip
+
+  # ─────────────────────────────────────────────────────────────
+  # Publish to GitHub Release with Checksums
+  # ─────────────────────────────────────────────────────────────
+  publish-release:
+    name: Publish GitHub Release
+    needs: [release-macos, release-linux, release-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Generate Checksums (SHA-256)
+        run: |
+          cd release-assets
+          sha256sum * > checksums.txt
+          cat checksums.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-assets/*
+          generate_release_notes: true
+          draft: false
+          prerelease: false
