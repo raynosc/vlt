@@ -55,7 +55,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: macos-artifacts
-          path: dist/*
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
 
   # ─────────────────────────────────────────────────────────────
   # Linux Build & Package (.tar.gz)
@@ -144,7 +146,7 @@ jobs:
       - name: Generate Checksums (SHA-256)
         run: |
           cd release-assets
-          sha256sum * > checksums.txt
+          find . -maxdepth 1 -type f -not -name "checksums.txt" -exec sha256sum {} + > checksums.txt
           cat checksums.txt
 
       - name: Create GitHub Release
