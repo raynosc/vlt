@@ -1,0 +1,10 @@
+# Rules for AI Agents Working on `vlt`
+
+You are contributing to `vlt`, a production-grade, local-first, zero-knowledge secrets and password manager in Go.
+
+## Invariants (Never violate)
+1. **Memory Zeroization**: Always clear sensitive buffers: `defer crypto.Zeroize(slice)` or `crypto.Zeroize(slice)`.
+2. **Blind Indexing (Schema v7)**: Names and metadata are encrypted. Blind lookup: `name_lookup = HMAC-SHA256(masterKey, "passwd.name." + name)`.
+3. **Platform Build Tags**: OS-specific code (e.g. CGo Carbon) MUST have `//go:build <os>` and a fallback stub `_other.go` for Linux/Windows headless environments.
+4. **Argv Security**: Never pass passwords as CLI argument flags; use stdin pipes.
+5. **Quality Verification**: Always run `make check` after code modifications to ensure 0 lint errors and 100% test pass.
