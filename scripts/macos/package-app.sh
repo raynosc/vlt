@@ -41,7 +41,7 @@ cat << 'EOF' > "$CONTENTS_DIR/Info.plist"
 	<key>CFBundleIconFile</key>
 	<string>app-icon.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.passwd.vlt</string>
+	<string>com.vlt.app</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
