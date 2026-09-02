@@ -157,3 +157,92 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+
+      - name: Update Homebrew Tap (Formula & Cask)
+        env:
+          TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          if [ -z "$TAP_GITHUB_TOKEN" ]; then
+            echo "HOMEBREW_TAP_TOKEN secret not found. Skipping Homebrew tap update."
+            exit 0
+          fi
+
+          VERSION="${{ github.ref_name }}"
+          # Strip leading 'v' for Formula/Cask version
+          CLEAN_VERSION="${VERSION#v}"
+
+          cd release-assets
+          SHA_MAC_APP=$(sha256sum "vlt_${VERSION}_macOS_Universal.app.zip" | awk '{print $1}')
+          SHA_DARWIN_ARM64=$(sha256sum "vlt_${VERSION}_darwin_arm64.tar.gz" | awk '{print $1}')
+          SHA_DARWIN_AMD64=$(sha256sum "vlt_${VERSION}_darwin_amd64.tar.gz" | awk '{print $1}')
+          SHA_LINUX_AMD64=$(sha256sum "vlt_${VERSION}_linux_amd64.tar.gz" | awk '{print $1}')
+          cd ..
+
+          git clone "https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/raynosc/homebrew-vlt.git" tap-repo
+          cd tap-repo
+
+          # Update Formula/vlt.rb
+          cat << EOF > Formula/vlt.rb
+# typed: false
+# frozen_string_literal: true
+
+class Vlt < Formula
+  desc "Local-first, zero-knowledge secrets and password manager"
+  homepage "https://github.com/raynosc/vlt"
+  version "${CLEAN_VERSION}"
+
+  on_macos do
+    if Hardware::CPU.arm?
+      url "https://github.com/raynosc/vlt/releases/download/v#{version}/vlt_v#{version}_darwin_arm64.tar.gz"
+      sha256 "${SHA_DARWIN_ARM64}"
+    else
+      url "https://github.com/raynosc/vlt/releases/download/v#{version}/vlt_v#{version}_darwin_amd64.tar.gz"
+      sha256 "${SHA_DARWIN_AMD64}"
+    end
+  end
+
+  on_linux do
+    if Hardware::CPU.intel?
+      url "https://github.com/raynosc/vlt/releases/download/v#{version}/vlt_v#{version}_linux_amd64.tar.gz"
+      sha256 "${SHA_LINUX_AMD64}"
+    end
+  end
+
+  def install
+    bin.install "vlt"
+    bin.install "vlt-tui"
+    bin.install "vlt-quick"
+    bin.install "vlt-sync"
+  end
+
+  test do
+    system "#{bin}/vlt", "--version"
+  end
+end
+EOF
+
+          # Update Casks/vlt.rb
+          cat << EOF > Casks/vlt.rb
+cask "vlt" do
+  version "${CLEAN_VERSION}"
+  sha256 "${SHA_MAC_APP}"
+
+  url "https://github.com/raynosc/vlt/releases/download/v#{version}/vlt_v#{version}_macOS_Universal.app.zip"
+  name "vlt"
+  desc "Local-first, zero-knowledge secrets and password manager"
+  homepage "https://github.com/raynosc/vlt"
+
+  app "vlt.app"
+  binary "#{appdir}/vlt.app/Contents/MacOS/vlt"
+
+  zap trash: [
+    "~/.config/passwd",
+  ]
+end
+EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/vlt.rb Casks/vlt.rb
+          git commit -m "chore(release): bump vlt to ${VERSION}" || exit 0
+          git push origin main
