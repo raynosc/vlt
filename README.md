@@ -16,6 +16,18 @@ A local-first, zero-knowledge secrets and password manager for everyone — from
 | `vlt-quick` | Floating search popup for rapid secret copy |
 | `vlt-sync` | Sync server for cross-device vault sync (see [Deployment Guide](docs/SYNC-DEPLOYMENT.md)) |
 
+## Installation
+
+### Via Homebrew (macOS & Linux)
+
+```bash
+# macOS: Desktop GUI Application (.app in /Applications, bypasses Gatekeeper)
+brew install --cask raynosc/vlt/vlt
+
+# macOS & Linux: CLI, TUI, Quick Access & Sync Server
+brew install raynosc/vlt/vlt
+```
+
 ## Quick Start
 
 ```bash
