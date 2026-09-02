@@ -1,62 +1,50 @@
 # Security Policy
 
-## Supported Versions
+## Security Philosophy
 
-We release patches and security fixes for the latest version of `vlt` / `passwd`.
+`vlt` is built on a **zero-knowledge, local-first** architecture. All encryption and decryption operations occur strictly client-side. The local database and sync server store exclusively ciphertext, HMAC blind indexes, and encrypted blobs. 
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.x     | :white_check_mark: |
-| < 1.0   | :x:                |
+We take vulnerability reports seriously and appreciate responsible disclosure.
 
 ---
 
-## Zero-Knowledge & Security Architecture
+## Supported Versions
 
-`vlt` is built on a strict **Zero-Knowledge** model:
-* **Client-Side Cryptography**: All encryption (AES-256-GCM + AAD) and key derivation (Argon2id) occur exclusively on your client device.
-* **Blind Sync Server**: Remote servers store only ciphertext blobs, HMAC-SHA256 blind lookup indexes, and UUIDs. The server never receives master passwords, secret keys, or plaintext data.
-* **RAM Sanitization**: Plaintext passwords, derived keys, and entropy buffers are explicitly overwritten in memory (`crypto.Zeroize`) after use.
-* **Safe Clipboard**: Clipboard auto-clear subprocesses receive secrets exclusively via `stdin` pipe to prevent leaks in OS process tables (`argv`/`ps aux`).
+Only the latest release receives active security patches and updates.
+
+| Version | Supported          |
+| ------- | ------------------ |
+| 1.0.x   | :white_check_mark: |
+| < 1.0   | :x:                |
 
 ---
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability or cryptographic weakness in `vlt`, please report it responsibly. **Do not create public GitHub issues for security vulnerabilities.**
+Please **DO NOT** report security vulnerabilities via public GitHub issues, discussions, or social media.
 
-### Preferred Method: GitHub Security Advisories
-1. Go to the **Security** tab of this repository.
-2. Click **Report a vulnerability** to open a private disclosure draft.
+### Preferred Method: Private Vulnerability Reporting (PVR)
 
-### Response Timeline
-* **Initial Response**: Within 48 hours.
-* **Assessment & Reproduction**: Within 7 business days.
-* **Remediation & Patch Release**: Coordinated with the reporter before public disclosure.
+Use GitHub's built-in **Private Vulnerability Reporting**:
+1. Go to the [Security Advisories](https://github.com/raynosc/vlt/security/advisories) tab of this repository.
+2. Click **"Report a vulnerability"** to submit your findings directly to the maintainers in an encrypted, private thread.
+
+### Alternative Method: Email
+
+If you cannot use GitHub Security Advisories, email:
+- **Email**: `raynosc@gmail.com`
+- **Subject**: `[SECURITY] Vulnerability report in vlt`
+
+Please include:
+- A clear description of the issue.
+- Proof of Concept (PoC) or reproducible steps.
+- The affected component (CLI, GUI, Sync server, Cryptographic primitive).
+- Any potential impact or attack vector assessment.
 
 ---
 
-## Security Verification & Continuous Auditing Pipeline
+## Disclosure Process
 
-To guarantee the integrity of our Zero-Knowledge architecture, every commit and release must pass the following local and CI quality gates:
-
-```bash
-# 1. AST Security Analysis & Static Checks (gosec + golangci-lint + go vet)
-make lint
-make sec
-
-# 2. Dependency Vulnerability Analysis (govulncheck)
-make vuln
-
-# 3. Dynamic Concurrency & Data Race Detector
-make test-all
-
-# 4. Fuzz Testing (Automated Mutation Testing for Parsers & Crypto Envelopes)
-make fuzz
-
-# 5. Full Quality Gate Suite
-make check   # lint + sec + test
-make ci      # lint + sec + vuln + test-all
-```
-
-We appreciate the security community's efforts in keeping `vlt` safe for everyone.
+1. **Acknowledgment**: We will acknowledge receipt of your report within 48 hours.
+2. **Investigation**: We will verify the issue, determine severity, and draft a remediation plan.
+3. **Patch & Release**: A security release will be prepared and published alongside a Security Advisory crediting your discovery (unless you prefer anonymity).
