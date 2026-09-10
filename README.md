@@ -160,9 +160,9 @@ Override with `--vault-path <path>` or use multi-vault switching with `vlt vault
 ## GUI Features (vlt-gui & vlt-gui.exe)
 
 - **Modern 3-column layout**: sidebar (categories + vaults) | list | detail
-- **Native Zero-Permission Global Hotkeys (macOS)**: System-wide shortcuts (`Shift+Cmd+Space` for Quick Access, `Shift+Cmd+V` for Vault GUI) powered by native Carbon `RegisterEventHotKey` (requires **zero** Accessibility or Input Monitoring permissions)
+- **Native Zero-Permission Global Hotkeys (Windows & macOS)**: System-wide shortcuts (`Shift+Ctrl+Space` on Windows or `Shift+Cmd+Space` on macOS for Quick Access; `Shift+Ctrl+V` / `Shift+Cmd+V` for Vault GUI) powered by native Win32 `RegisterHotKey` and macOS Carbon `RegisterEventHotKey`
 - **Dynamic Hotkey Re-registration**: Modify your shortcut combinations in Settings anytime with immediate, real-time in-memory updates
-- **Crisp Retina Menu Bar / System Tray**: Minimalist monochrome template icon living in the macOS status bar for background persistence
+- **Crisp System Tray & Menu Bar**: System tray icon in Windows notification area and macOS status bar for background persistence
 - **Single-Instance IPC**: Opening the app when already running brings the existing window to front with zero startup delay
 - **Inactivity Auto-Lock**: Configurable auto-lock timer in Settings (`5m`, `15m`, `30m`, `60m`, `Never`)
 - **Watchtower** security dashboard: weak passwords, duplicate detection, missing 2FA, expiring certificates

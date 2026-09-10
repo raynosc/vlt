@@ -588,10 +588,18 @@ func iconColor(name string) color.NRGBA {
 	return palette[h%len(palette)]
 }
 
-// openBrowser opens a URL in the default browser (macOS).
+// openBrowser opens a URL in the default browser across macOS, Windows, and Linux.
 func openBrowser(url string) error {
-	cmd := exec.Command("open", url)
-	return cmd.Run()
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", url)
+	case "darwin":
+		cmd = exec.Command("open", url)
+	default:
+		cmd = exec.Command("xdg-open", url)
+	}
+	return cmd.Start()
 }
 
 // ── Quick Access Popup ──
@@ -679,7 +687,8 @@ func (e *quickSearchEntry) TypedShortcut(s fyne.Shortcut) {
 		return
 	}
 	if cs, ok := s.(*desktop.CustomShortcut); ok {
-		if cs.KeyName == fyne.KeyC && cs.Modifier&(fyne.KeyModifierSuper|fyne.KeyModifierShift) == fyne.KeyModifierSuper|fyne.KeyModifierShift {
+		isCtrlOrSuper := (cs.Modifier&fyne.KeyModifierSuper != 0) || (cs.Modifier&fyne.KeyModifierControl != 0)
+		if cs.KeyName == fyne.KeyC && isCtrlOrSuper && (cs.Modifier&fyne.KeyModifierShift != 0) {
 			if e.onCopyPassword != nil {
 				e.onCopyPassword()
 			}
@@ -795,29 +804,35 @@ func (m *quickModel) primary(showDetailFn func()) {
 	}
 }
 
-// handleShortcut is the single dispatcher for ⌘-combos. It is called from
+// handleShortcut is the single dispatcher for ⌘/Ctrl-combos. It is called from
 // both the search entry's shortcutHook (list view) and canvas.AddShortcut
 // (detail view). Returns true if the shortcut was handled.
 func (m *quickModel) handleShortcut(s fyne.Shortcut) bool {
-	// ⌘ C — copy username
+	// ⌘ C / Ctrl C — copy username
 	if _, ok := s.(*fyne.ShortcutCopy); ok {
 		m.copyUsername()
 		return true
 	}
 	if cs, ok := s.(*desktop.CustomShortcut); ok {
-		switch {
-		case cs.KeyName == fyne.KeyC && cs.Modifier == fyne.KeyModifierSuper:
-			m.copyUsername()
-			return true
-		case cs.KeyName == fyne.KeyC && cs.Modifier == fyne.KeyModifierSuper|fyne.KeyModifierShift:
-			m.copyPassword()
-			return true
-		case cs.KeyName == fyne.KeyReturn && cs.Modifier == fyne.KeyModifierSuper:
-			m.openInBrowser()
-			return true
-		case cs.KeyName == fyne.KeyT && cs.Modifier == fyne.KeyModifierSuper:
-			m.copyTOTP()
-			return true
+		isCtrlOrSuper := (cs.Modifier&fyne.KeyModifierSuper != 0) || (cs.Modifier&fyne.KeyModifierControl != 0)
+		isShift := cs.Modifier&fyne.KeyModifierShift != 0
+		hasOtherMods := (cs.Modifier &^ (fyne.KeyModifierSuper | fyne.KeyModifierControl | fyne.KeyModifierShift)) != 0
+
+		if isCtrlOrSuper && !hasOtherMods {
+			switch {
+			case cs.KeyName == fyne.KeyC && !isShift:
+				m.copyUsername()
+				return true
+			case cs.KeyName == fyne.KeyC && isShift:
+				m.copyPassword()
+				return true
+			case (cs.KeyName == fyne.KeyReturn || cs.KeyName == fyne.KeyEnter) && !isShift:
+				m.openInBrowser()
+				return true
+			case cs.KeyName == fyne.KeyT && !isShift:
+				m.copyTOTP()
+				return true
+			}
 		}
 	}
 	return false
@@ -884,9 +899,19 @@ func buildKeyCap(label string) fyne.CanvasObject {
 	return container.NewStack(capBg, capBorder, container.NewCenter(capText))
 }
 
+func modKeySymbol() string {
+	if runtime.GOOS == "darwin" {
+		return "⌘"
+	}
+	return "Ctrl"
+}
+
 func buildShortcutWidget(keys []string, action string) fyne.CanvasObject {
 	var elements []fyne.CanvasObject
 	for _, key := range keys {
+		if key == "⌘" {
+			key = modKeySymbol()
+		}
 		elements = append(elements, buildKeyCap(key))
 	}
 	actionText := canvas.NewText(" "+action, color.NRGBA{R: 0xA1, G: 0xA1, B: 0xAA, A: 0xFF})
@@ -1263,9 +1288,15 @@ func showQuickPopupWithModel(m *quickModel) {
 
 	for _, sc := range []*desktop.CustomShortcut{
 		{KeyName: fyne.KeyC, Modifier: fyne.KeyModifierSuper},
+		{KeyName: fyne.KeyC, Modifier: fyne.KeyModifierControl},
 		{KeyName: fyne.KeyC, Modifier: fyne.KeyModifierSuper | fyne.KeyModifierShift},
+		{KeyName: fyne.KeyC, Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift},
 		{KeyName: fyne.KeyReturn, Modifier: fyne.KeyModifierSuper},
+		{KeyName: fyne.KeyReturn, Modifier: fyne.KeyModifierControl},
+		{KeyName: fyne.KeyEnter, Modifier: fyne.KeyModifierSuper},
+		{KeyName: fyne.KeyEnter, Modifier: fyne.KeyModifierControl},
 		{KeyName: fyne.KeyT, Modifier: fyne.KeyModifierSuper},
+		{KeyName: fyne.KeyT, Modifier: fyne.KeyModifierControl},
 	} {
 		cv.AddShortcut(sc, func(s fyne.Shortcut) { m.handleShortcut(s) })
 	}
@@ -1424,40 +1455,34 @@ func showQuickDetailWithModel(m *quickModel, name string, searchEntry *quickSear
 		}
 	})
 
-	cv.AddShortcut(&desktop.CustomShortcut{
-		KeyName: fyne.KeyC, Modifier: fyne.KeyModifierSuper,
-	}, func(s fyne.Shortcut) {
-		m.backend.RecordActivity()
-		m.handleShortcut(s)
-	})
+	for _, sc := range []*desktop.CustomShortcut{
+		{KeyName: fyne.KeyC, Modifier: fyne.KeyModifierSuper},
+		{KeyName: fyne.KeyC, Modifier: fyne.KeyModifierControl},
+		{KeyName: fyne.KeyC, Modifier: fyne.KeyModifierSuper | fyne.KeyModifierShift},
+		{KeyName: fyne.KeyC, Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift},
+		{KeyName: fyne.KeyReturn, Modifier: fyne.KeyModifierSuper},
+		{KeyName: fyne.KeyReturn, Modifier: fyne.KeyModifierControl},
+		{KeyName: fyne.KeyEnter, Modifier: fyne.KeyModifierSuper},
+		{KeyName: fyne.KeyEnter, Modifier: fyne.KeyModifierControl},
+		{KeyName: fyne.KeyT, Modifier: fyne.KeyModifierSuper},
+		{KeyName: fyne.KeyT, Modifier: fyne.KeyModifierControl},
+	} {
+		cv.AddShortcut(sc, func(s fyne.Shortcut) {
+			m.backend.RecordActivity()
+			m.handleShortcut(s)
+		})
+	}
 
-	cv.AddShortcut(&desktop.CustomShortcut{
-		KeyName: fyne.KeyC, Modifier: fyne.KeyModifierSuper | fyne.KeyModifierShift,
-	}, func(s fyne.Shortcut) {
-		m.backend.RecordActivity()
-		m.handleShortcut(s)
-	})
-
-	cv.AddShortcut(&desktop.CustomShortcut{
-		KeyName: fyne.KeyReturn, Modifier: fyne.KeyModifierSuper,
-	}, func(s fyne.Shortcut) {
-		m.backend.RecordActivity()
-		m.handleShortcut(s)
-	})
-
-	cv.AddShortcut(&desktop.CustomShortcut{
-		KeyName: fyne.KeyT, Modifier: fyne.KeyModifierSuper,
-	}, func(s fyne.Shortcut) {
-		m.backend.RecordActivity()
-		m.handleShortcut(s)
-	})
-
-	cv.AddShortcut(&desktop.CustomShortcut{
-		KeyName: fyne.KeyReturn, Modifier: fyne.KeyModifierShift,
-	}, func(s fyne.Shortcut) {
+	autofillHandler := func(s fyne.Shortcut) {
 		fyne.CurrentApp().Clipboard().SetContent(password)
 		m.dismiss()
-	})
+	}
+	cv.AddShortcut(&desktop.CustomShortcut{
+		KeyName: fyne.KeyReturn, Modifier: fyne.KeyModifierShift,
+	}, autofillHandler)
+	cv.AddShortcut(&desktop.CustomShortcut{
+		KeyName: fyne.KeyEnter, Modifier: fyne.KeyModifierShift,
+	}, autofillHandler)
 
 	m.w.Canvas().Unfocus()
 
