@@ -32,6 +32,7 @@ jobs:
           mkdir -p dist/bin-darwin-arm64 dist/bin-darwin-amd64
           # ARM64
           GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-arm64/vlt ./cmd/vlt
+          CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-arm64/vlt-gui ./cmd/vlt-gui
           GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-arm64/vlt-tui ./cmd/vlt-tui
           GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-arm64/vlt-quick ./cmd/vlt-quick
           GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-arm64/vlt-sync ./cmd/vlt-sync
@@ -39,6 +40,7 @@ jobs:
 
           # AMD64
           GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-amd64/vlt ./cmd/vlt
+          CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-amd64/vlt-gui ./cmd/vlt-gui
           GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-amd64/vlt-tui ./cmd/vlt-tui
           GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-amd64/vlt-quick ./cmd/vlt-quick
           GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-amd64/vlt-sync ./cmd/vlt-sync

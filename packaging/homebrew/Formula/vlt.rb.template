@@ -25,7 +25,7 @@ class Vlt < Formula
 
   def install
     bin.install "vlt"
-    bin.install "vlt-gui"
+    bin.install "vlt-gui" if File.exist?("vlt-gui")
     bin.install "vlt-tui"
     bin.install "vlt-quick"
     bin.install "vlt-sync"
