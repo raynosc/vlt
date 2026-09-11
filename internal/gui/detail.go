@@ -383,7 +383,7 @@ func buildPasswordField(label fyne.CanvasObject, realValue string, onSave func(s
 	revealBtn.Importance = widget.LowImportance
 
 	copyBtn := widget.NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
-		fyne.CurrentApp().Clipboard().SetContent(realValue)
+		clipboardCopyAndAutoClear(realValue)
 	})
 	copyBtn.Importance = widget.LowImportance
 
@@ -564,7 +564,7 @@ func (g *GUI) buildTOTPField(label fyne.CanvasObject, name string) fyne.CanvasOb
 	copyBtn := widget.NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
 		code, _, err := g.backend.GetTOTP(name)
 		if err == nil {
-			g.fyneApp.Clipboard().SetContent(code)
+			clipboardCopyAndAutoClear(code)
 		}
 	})
 	copyBtn.Importance = widget.LowImportance

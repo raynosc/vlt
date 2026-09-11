@@ -561,30 +561,36 @@ func newClearClipboardCmd() *cobra.Command {
 		Hidden: true,
 		Args:   cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			// Read from the command's input (cobra falls back to os.Stdin for
-			// the real subprocess, and tests inject via SetIn). Reading
-			// os.Stdin directly broke the comparison under test — and any
-			// caller that rewires stdin — so the clipboard was never cleared.
-			data, err := io.ReadAll(cmd.InOrStdin())
-			if err != nil {
-				return fmt.Errorf("read expected clipboard: %w", err)
-			}
-			// Trim a single trailing newline, if any, so callers can write
-			// `text + "\n"` without altering the comparison.
-			if n := len(data); n > 0 && data[n-1] == '\n' {
-				data = data[:n-1]
-			}
-			expected := string(data)
-			crypto.Zeroize(data)
-
-			time.Sleep(clipboardClearDelay)
-			current, err := clipboard.ReadAll()
-			if err == nil && current == expected {
-				_ = clipboard.WriteAll("")
-			}
-			return nil
+			return RunClearClipboard(cmd.InOrStdin())
 		},
 	}
+}
+
+// RunClearClipboard reads the expected clipboard text from r and,
+// after clipboardClearDelay, clears the clipboard only if it still matches.
+func RunClearClipboard(r io.Reader) error {
+	// Read from the command's input (cobra falls back to os.Stdin for
+	// the real subprocess, and tests inject via SetIn). Reading
+	// os.Stdin directly broke the comparison under test — and any
+	// caller that rewires stdin — so the clipboard was never cleared.
+	data, err := io.ReadAll(r)
+	if err != nil {
+		return fmt.Errorf("read expected clipboard: %w", err)
+	}
+	// Trim a single trailing newline, if any, so callers can write
+	// `text + "\n"` without altering the comparison.
+	if n := len(data); n > 0 && data[n-1] == '\n' {
+		data = data[:n-1]
+	}
+	expected := string(data)
+	crypto.Zeroize(data)
+
+	time.Sleep(clipboardClearDelay)
+	current, err := clipboard.ReadAll()
+	if err == nil && current == expected {
+		_ = clipboard.WriteAll("")
+	}
+	return nil
 }
 
 // StartClipboardAutoClear spawns a detached background process of the current

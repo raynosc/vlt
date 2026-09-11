@@ -66,6 +66,13 @@ var (
 )
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "__clear-clipboard" {
+		if err := cli.RunClearClipboard(os.Stdin); err != nil {
+			os.Exit(cli.ExitErr)
+		}
+		return
+	}
+
 	flag.Parse()
 
 	os.Exit(run())

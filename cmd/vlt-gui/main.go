@@ -32,6 +32,13 @@ import (
 )
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "__clear-clipboard" {
+		if err := cli.RunClearClipboard(os.Stdin); err != nil {
+			os.Exit(cli.ExitErr)
+		}
+		return
+	}
+
 	vaultName := flag.String("vault", "", "vault name (e.g. --vault work)")
 	noKeychain := flag.Bool("no-keychain", false, "skip macOS Keychain auto-unlock")
 	socketPath := flag.String("socket", "", "Unix socket path for daemon")

@@ -110,3 +110,33 @@ func TestClearClipboardCmd_DoesNotClearIfChanged(t *testing.T) {
 		t.Fatalf("clipboard should still contain %q (user-supplied), got %q", updated, got)
 	}
 }
+
+func TestRunClearClipboard_Direct(t *testing.T) {
+	if testing.Short() {
+		t.Skip("requires a clipboard backend; skip in short mode")
+	}
+	if err := clipboard.WriteAll("vlt-test-precheck"); err != nil {
+		t.Skipf("clipboard unavailable in this environment: %v", err)
+	}
+
+	const secret = "direct-run-clear-test"
+	if err := clipboard.WriteAll(secret); err != nil {
+		t.Fatalf("seed clipboard: %v", err)
+	}
+
+	old := clipboardClearDelay
+	clipboardClearDelay = 0
+	t.Cleanup(func() { clipboardClearDelay = old })
+
+	if err := RunClearClipboard(strings.NewReader(secret)); err != nil {
+		t.Fatalf("RunClearClipboard: %v", err)
+	}
+
+	got, err := clipboard.ReadAll()
+	if err != nil {
+		t.Fatalf("read clipboard: %v", err)
+	}
+	if got != "" {
+		t.Fatalf("expected clipboard to be empty, got %q", got)
+	}
+}

@@ -33,6 +33,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
+	"github.com/raynosc/vlt/internal/cli"
 	"github.com/raynosc/vlt/internal/config"
 	"github.com/raynosc/vlt/internal/secret"
 	themepkg "github.com/raynosc/vlt/internal/theme"
@@ -602,6 +603,15 @@ func openBrowser(url string) error {
 	return cmd.Start()
 }
 
+// clipboardCopyAndAutoClear sets text to clipboard and starts auto-clear timer.
+func clipboardCopyAndAutoClear(text string) {
+	if text == "" {
+		return
+	}
+	fyne.CurrentApp().Clipboard().SetContent(text)
+	cli.StartClipboardAutoClear(text)
+}
+
 // ── Quick Access Popup ──
 
 // ── Custom Search Entry for Shortcut Interception ──
@@ -760,7 +770,7 @@ func (m *quickModel) copyPassword() {
 	if err != nil {
 		return
 	}
-	fyne.CurrentApp().Clipboard().SetContent(value)
+	clipboardCopyAndAutoClear(value)
 	m.dismiss()
 }
 
@@ -786,7 +796,7 @@ func (m *quickModel) copyTOTP() {
 	if err != nil {
 		return
 	}
-	fyne.CurrentApp().Clipboard().SetContent(code)
+	clipboardCopyAndAutoClear(code)
 	m.dismiss()
 }
 
@@ -1419,7 +1429,7 @@ func showQuickDetailWithModel(m *quickModel, name string, searchEntry *quickSear
 		navActions = append(navActions, makeActionRow(theme.ComputerIcon(), "Open In Browser", []string{"⌘", "↵"}, m.openInBrowser))
 	}
 	navActions = append(navActions, makeActionRow(theme.ConfirmIcon(), "Autofill & Close", []string{"⇧", "↵"}, func() {
-		fyne.CurrentApp().Clipboard().SetContent(password)
+		clipboardCopyAndAutoClear(password)
 		m.dismiss()
 	}))
 	if meta != nil && meta.OTPAuth != "" {
@@ -1474,7 +1484,7 @@ func showQuickDetailWithModel(m *quickModel, name string, searchEntry *quickSear
 	}
 
 	autofillHandler := func(s fyne.Shortcut) {
-		fyne.CurrentApp().Clipboard().SetContent(password)
+		clipboardCopyAndAutoClear(password)
 		m.dismiss()
 	}
 	cv.AddShortcut(&desktop.CustomShortcut{
@@ -2168,7 +2178,7 @@ func (g *GUI) showListScreen() {
 		if g.selectedName != "" {
 			_, pwd, err := g.backend.GetSecret(g.selectedName)
 			if err == nil {
-				fyne.CurrentApp().Clipboard().SetContent(pwd)
+				clipboardCopyAndAutoClear(pwd)
 			}
 		}
 	}
@@ -2566,7 +2576,7 @@ func (g *GUI) showListScreen() {
 		if g.selectedName != "" {
 			_, pwd, err := g.backend.GetSecret(g.selectedName)
 			if err == nil {
-				fyne.CurrentApp().Clipboard().SetContent(pwd)
+				clipboardCopyAndAutoClear(pwd)
 			}
 		}
 	}
@@ -3179,7 +3189,7 @@ func (g *GUI) showSettingsScreen() {
 		phraseBox.Disable()
 
 		copyBtn := widget.NewButtonWithIcon("Copy Phrase to Clipboard", theme.ContentCopyIcon(), func() {
-			fyne.CurrentApp().Clipboard().SetContent(mnemonic)
+			clipboardCopyAndAutoClear(mnemonic)
 			dialog.ShowInformation("Copied", "Recovery phrase copied to clipboard.\nStore it safely offline!", g.window)
 		})
 
