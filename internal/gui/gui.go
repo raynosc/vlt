@@ -483,12 +483,6 @@ func (g *GUI) setupTray() {
 // ── Quick Access ──
 
 func (g *GUI) launchQuick() {
-	if !g.backend.IsUnlocked() {
-		g.window.Show()
-		g.window.RequestFocus()
-		return
-	}
-
 	if g.quickWindow != nil {
 		g.quickWindow.Hide()
 		g.quickWindow.Close()
@@ -496,6 +490,9 @@ func (g *GUI) launchQuick() {
 	}
 
 	w := newQuickWindow(g.fyneApp)
+	w.Resize(fyne.NewSize(600, 460))
+	w.CenterOnScreen()
+	w.SetFixedSize(true)
 	g.quickWindow = w
 	w.SetCloseIntercept(func() {
 		w.Hide()
@@ -504,7 +501,27 @@ func (g *GUI) launchQuick() {
 			g.quickWindow = nil
 		}
 	})
-	showQuickPopup(w, g.backend)
+
+	if !g.backend.IsUnlocked() {
+		showQuickUnlock(w, g.backend, func(unlockedBackend *App) {
+			if unlockedBackend != nil {
+				g.backend = unlockedBackend
+			}
+			g.recordActivity()
+			g.backend.StartAutoSync(func(seq int64) {
+				if g.window != nil && g.currentScreen == "list" {
+					g.showListScreen()
+				}
+			})
+			if g.window != nil {
+				g.window.Resize(fyne.NewSize(960, 680))
+				g.showListScreen()
+			}
+		})
+	} else {
+		showQuickPopup(w, g.backend)
+	}
+
 	w.Show()
 	w.RequestFocus()
 }
@@ -1587,7 +1604,7 @@ func RunQuick(vaultName string, noKeychain bool) {
 
 // showQuickUnlock displays an unlock prompt inside the given window.
 // On successful unlock it transitions to the search popup.
-func showQuickUnlock(w fyne.Window, backend *App) {
+func showQuickUnlock(w fyne.Window, backend *App, onUnlocked ...func(unlockedBackend *App)) {
 	currentBackend := backend
 	pwEntry := widget.NewEntry()
 	pwEntry.SetPlaceHolder("Master password")
@@ -1602,11 +1619,24 @@ func showQuickUnlock(w fyne.Window, backend *App) {
 		}
 		if err := currentBackend.Unlock(pw); err != nil {
 			pwEntry.SetText("")
+			instruction.SetText("Incorrect master password. Please try again.")
 			w.Canvas().Focus(pwEntry)
 			return
 		}
+		for _, cb := range onUnlocked {
+			if cb != nil {
+				cb(currentBackend)
+			}
+		}
 		showQuickPopup(w, currentBackend)
 	}
+
+	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
+		if k.Name == fyne.KeyEscape {
+			w.Hide()
+			w.Close()
+		}
+	})
 
 	unlockBtn := widget.NewButton("Unlock", func() {
 		pwEntry.OnSubmitted(pwEntry.Text)

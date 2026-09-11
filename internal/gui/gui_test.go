@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"fyne.io/fyne/v2/test"
 )
 
 func TestBuildOTPAuthURI_EncodesSpecialChars(t *testing.T) {
@@ -65,5 +67,24 @@ func TestGUIIPCMessage_Serialization(t *testing.T) {
 	msg := guiIPCMessage{Cmd: "quick"}
 	if msg.Cmd != "quick" {
 		t.Errorf("expected Cmd quick, got %s", msg.Cmd)
+	}
+}
+
+func TestShowQuickUnlock_StructureAndCallbacks(t *testing.T) {
+	testApp := test.NewApp()
+	defer testApp.Quit()
+	w := testApp.NewWindow("test")
+	defer w.Close()
+
+	called := false
+	showQuickUnlock(w, &App{}, func(backend *App) {
+		called = true
+	})
+
+	if w.Content() == nil {
+		t.Error("expected window content to be set by showQuickUnlock")
+	}
+	if called {
+		t.Error("callback should not be called until unlocked")
 	}
 }
