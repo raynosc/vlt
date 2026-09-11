@@ -1,29 +1,31 @@
-# Guía de Usuario de vlt
+# vlt User Guide
 
-`vlt` es un gestor de secretos local-first y zero-knowledge para desarrolladores. Esta guía te llevará desde la instalación hasta el uso avanzado de todas sus interfaces.
+[English](USER_GUIDE.md) | [Español](es/USER_GUIDE.md)
 
-## Tabla de Contenidos
+`vlt` is a local-first, zero-knowledge secrets manager for developers. This guide will take you from installation to advanced use of all its interfaces.
 
-1.  [Instalación](#instalación)
-2.  [Primeros Pasos](#primeros-pasos)
-3.  [Conceptos Clave](#conceptos-clave)
-4.  [Uso de la CLI (`vlt`)](#uso-de-la-cli-vlt)
-5.  [Uso de la GUI (`vlt-gui`)](#uso-de-la-gui-vlt-gui)
-6.  [Uso de la TUI (`vlt-tui`)](#uso-de-la-tui-vlt-tui)
-7.  [Sincronización](#sincronización)
-8.  [Resolución de Problemas](#resolución-de-problemas)
+## Table of Contents
+
+1.  [Installation](#installation)
+2.  [Getting Started](#getting-started)
+3.  [Key Concepts](#key-concepts)
+4.  [Using the CLI (`vlt`)](#using-the-cli-vlt)
+5.  [Using the GUI (`vlt-gui`)](#using-the-gui-vlt-gui)
+6.  [Using the TUI (`vlt-tui`)](#using-the-tui-vlt-tui)
+7.  [Synchronization](#synchronization)
+8.  [Troubleshooting](#troubleshooting)
 
 ---
 
-## Instalación
+## Installation
 
-### Opción 1: Binarios Pre-compilados
+### Option 1: Pre-compiled Binaries
 
-Descarga los binarios desde la página de releases del repositorio de GitHub y colócalos en tu `PATH`.
+Download the binaries from the GitHub repository's releases page and place them in your `PATH`.
 
-### Opción 2: Con `go install`
+### Option 2: With `go install`
 
-Si tienes Go 1.26+ instalado:
+If you have Go 1.26+ installed:
 
 ```bash
 go install github.com/raynosc/vlt/cmd/vlt@latest
@@ -31,7 +33,7 @@ go install github.com/raynosc/vlt/cmd/vlt-gui@latest
 go install github.com/raynosc/vlt/cmd/vlt-tui@latest
 ```
 
-### Opción 3: Compilar desde el Código Fuente
+### Option 3: Build from Source
 
 ```bash
 git clone https://github.com/raynosc/vlt.git
@@ -39,410 +41,410 @@ cd vlt
 make build
 ```
 
-Esto generará los binarios en el directorio `bin/`.
+This will generate the binaries in the `bin/` directory.
 
 ---
 
-## Primeros Pasos
+## Getting Started
 
-### 1. Inicializar el Vault
+### 1. Initialize the Vault
 
-La primera vez que uses `vlt`, necesitas inicializar tu vault:
+The first time you use `vlt`, you need to initialize your vault:
 
 ```bash
 ./bin/vlt init
 ```
 
-Se te pedirá que crees una **contraseña maestra** segura. Esta contraseña es la única clave para acceder a todos tus secretos. **NO la olvides.**
+You will be asked to create a secure **master password**. This password is the only key to access all your secrets. **DO NOT forget it.**
 
-### 2. Desbloquear el Vault
+### 2. Unlock the Vault
 
-Cada vez que uses `vlt`, se te pedirá la contraseña maestra para desbloquear el vault. También puedes usar la variable de entorno `PASSWD_MASTER_PASSWORD` para scripts (con precaución).
+Every time you use `vlt`, you will be asked for the master password to unlock the vault. You can also use the `PASSWD_MASTER_PASSWORD` environment variable for scripts (with caution).
 
-### 3. Almacenar tu Primer Secreto
+### 3. Store your First Secret
 
 ```bash
-./bin/vlt add mi-token-github --value "ghp_xxxxxxxxxxxx"
+./bin/vlt add my-github-token --value "ghp_xxxxxxxxxxxx"
 ./bin/vlt list
 ```
 
 ---
 
-## Conceptos Clave
+## Key Concepts
 
-*   **Contraseña Maestra (Master Password):** La contraseña que protege todo tu vault. Deriva la clave de encriptación real (Argon2id) y nunca se almacena en disco.
-*   **Vault:** Archivo SQLite encriptado (`vault.sqlite`) que almacena todos tus secretos. Ubicación: `~/.config/passwd/` (Linux), `~/Library/Application Support/passwd/` (macOS).
-*   **Secreto (Secret):** Unidad básica de almacenamiento. Cada secreto tiene un nombre, un valor (encriptado), y metadatos (tipo, etiquetas, notas).
-*   **Encriptación Zero-Knowledge:** El valor de cada secreto se encripta individualmente con AES-256-GCM. La desencriptación ocurre solo en tu dispositivo, con tu contraseña maestra.
+*   **Master Password:** The password that protects your entire vault. It derives the actual encryption key (Argon2id) and is never stored on disk.
+*   **Vault:** Encrypted SQLite file (`vault.sqlite`) that stores all your secrets. Location: `~/.config/passwd/` (Linux), `~/Library/Application Support/passwd/` (macOS).
+*   **Secret:** Basic storage unit. Each secret has a name, a (encrypted) value, and metadata (type, tags, notes).
+*   **Zero-Knowledge Encryption:** The value of each secret is individually encrypted with AES-256-GCM. Decryption happens only on your device, using your master password.
 
 ---
 
-## Uso de la CLI (`vlt`)
+## Using the CLI (`vlt`)
 
-`vlt` es la interfaz de línea de comandos principal. Ejecuta `./bin/vlt` o `vlt` (si está en tu PATH).
+`vlt` is the primary command-line interface. Run `./bin/vlt` or `vlt` (if it's in your PATH).
 
-### Añadir Secretos
+### Adding Secrets
 
-*   **Interactivo:**
+*   **Interactive:**
     ```bash
-    vlt add mi-secreto
-    # Se te pedirán: Nombre, Valor, Notas (opcional)
+    vlt add my-secret
+    # You will be prompted for: Name, Value, Notes (optional)
     ```
 
-*   **No interactivo (scripts / CI):** el valor se lee por `stdin`, nunca como argumento (así no queda en el historial ni en la lista de procesos).
+*   **Non-interactive (scripts / CI):** the value is read from `stdin`, never as an argument (so it doesn't end up in your history or process list).
     ```bash
-    echo "sk-xxx" | vlt add mi-api-key --stdin --type api_key
+    echo "sk-xxx" | vlt add my-api-key --stdin --type api_key
     ```
 
-*   **Con metadatos:**
+*   **With metadata:**
     ```bash
-    vlt add github --type password --tags "trabajo,git" --notes "cuenta de la empresa"
+    vlt add github --type password --tags "work,git" --notes "company account"
     ```
 
-*   **Desde un archivo (certificado, clave SSH):** auto-detecta el formato; si omitís el nombre, usa el del archivo.
+*   **From a file (certificate, SSH key):** auto-detects format; if you omit the name, it uses the filename.
     ```bash
     vlt add --file cert.pem
     vlt add --file ~/.ssh/id_ed25519
-    # Para PKCS#12 (bundle .p12) con contraseña de descifrado:
+    # For PKCS#12 (.p12 bundle) with decryption password:
     vlt add --file bundle.p12 --password p12pass
     ```
 
-**Flags de `add`:** `--type` (`password`, `api_key`, `certificate`, `ssh_key`, `note`, `other`) · `--tags` (separadas por coma) · `--notes` · `--stdin` · `--file` · `--password` (solo con `--file`) · `--overwrite`.
+**`add` flags:** `--type` (`password`, `api_key`, `certificate`, `ssh_key`, `note`, `other`) · `--tags` (comma-separated) · `--notes` · `--stdin` · `--file` · `--password` (only with `--file`) · `--overwrite`.
 
-### Listar y Buscar Secretos
+### Listing and Searching Secrets
 
 ```bash
-# Listar todos los secretos
+# List all secrets
 vlt list
 
-# Filtrar por tipo (valores: password, api_key, certificate, ssh_key, note, other)
+# Filter by type (values: password, api_key, certificate, ssh_key, note, other)
 vlt list --kind certificate
 vlt list --kind password
 vlt list --kind ssh_key
 
-# Filtrar por etiqueta, o listar todas las etiquetas con su conteo
+# Filter by tag, or list all tags with their count
 vlt list --tag production
 vlt list --tags
 
-# Buscar por nombre
+# Search by name
 vlt search github
 
-# Listar secretos próximos a expirar (en días)
+# List secrets about to expire (in days)
 vlt list --expiring 30
 ```
 
-### Obtener y Mostrar Secretos
+### Getting and Showing Secrets
 
 ```bash
-# Mostrar el valor del secreto
-vlt get mi-secreto
+# Show the secret's value
+vlt get my-secret
 
-# Copiar al portapapeles (se auto-borra a los 30s, solo si no copiaste otra cosa)
-vlt get mi-secreto --copy
+# Copy to clipboard (auto-clears after 30s, only if you didn't copy something else)
+vlt get my-secret --copy
 
-# Mostrar el secreto en JSON
-vlt get mi-secreto --json
+# Show the secret in JSON
+vlt get my-secret --json
 ```
 
-### Editar y Eliminar Secretos
+### Editing and Deleting Secrets
 
 ```bash
-# Editar interactivamente
-vlt edit mi-secreto
+# Edit interactively
+vlt edit my-secret
 
-# Eliminar
-vlt rm mi-secreto
+# Delete
+vlt rm my-secret
 ```
 
-### Generar Contraseñas Seguras
+### Generating Secure Passwords
 
 ```bash
-# Generar una contraseña aleatoria (24 caracteres por defecto)
+# Generate a random password (24 characters by default)
 vlt generate
 
-# Opciones:
-vlt generate --length 32        # o -l 32
-vlt generate --no-symbols       # excluir símbolos
-vlt generate --copy             # copiar al portapapeles en vez de imprimir (o -c)
+# Options:
+vlt generate --length 32        # or -l 32
+vlt generate --no-symbols       # exclude symbols
+vlt generate --copy             # copy to clipboard instead of printing (or -c)
 ```
 
-### Importar y Exportar
+### Import and Export
 
-#### Importar
+#### Import
 
-`vlt import <archivo>` detecta el formato por **la extensión** del archivo:
+`vlt import <file>` detects the format from the **file extension**:
 
 ```bash
-# CSV o JSON (esquema de exportación estándar: cada registro necesita nombre + password)
+# CSV or JSON (standard export schema: each record needs name + password)
 vlt import passwords.csv
 vlt import data.json
 
-# Validar el archivo SIN guardar nada (recomendado antes de importar de verdad)
+# Validate the file WITHOUT saving anything (recommended before real import)
 vlt import passwords.csv --dry-run
 
-# Reemplazar secretos existentes con el mismo nombre
+# Replace existing secrets with the same name
 vlt import passwords.csv --overwrite
 
-# Importar un TOTP desde una imagen de código QR (otpauth://)
+# Import a TOTP from a QR code image (otpauth://)
 vlt import qr-code.png --qr
 ```
 
-> Solo se aceptan extensiones `.csv` y `.json` (o una imagen con `--qr`). Cualquier otra extensión da error. Los registros sin nombre o sin password se omiten. El seed OTP se guarda cifrado dentro del valor del secreto, nunca en los metadatos en claro.
+> Only `.csv` and `.json` extensions are accepted (or an image with `--qr`). Any other extension results in an error. Records without a name or password are skipped. The OTP seed is stored encrypted inside the secret's value, never in plaintext metadata.
 
-**Flags de `import`:** `--dry-run` · `--overwrite` · `--qr`.
+**`import` flags:** `--dry-run` · `--overwrite` · `--qr`.
 
-#### Exportar
+#### Export
 
 ```bash
-# Exportar todas las contraseñas a CSV o JSON
+# Export all passwords to CSV or JSON
 vlt export --format csv --force
 vlt export --format json --force
 
-# Exportar solo un tipo de secreto
+# Export only one type of secret
 vlt export --kind password --format json --force
 
-# Exportar certificados/claves a archivos en un directorio
+# Export certificates/keys to files in a directory
 vlt export --kind certificate --output ./backup --force
 ```
 
-**Flags de `export`:** `--format` (`csv` | `json`) · `--kind` (`password`, `api_key`, `certificate`, `ssh_key`, …; vacío = todos) · `--output` (directorio para certificados/claves) · `--force` (omite la confirmación; obligatorio en uso no interactivo).
+**`export` flags:** `--format` (`csv` | `json`) · `--kind` (`password`, `api_key`, `certificate`, `ssh_key`, …; empty = all) · `--output` (directory for certificates/keys) · `--force` (skips confirmation; required in non-interactive use).
 
-> ⚠️ Un export pone tus secretos en **texto plano** en disco. Borralo apenas lo uses y nunca lo subas a un repositorio o backup sin cifrar.
+> ⚠️ An export places your secrets in **plaintext** on disk. Delete it as soon as you're done and never upload it to a repository or backup unencrypted.
 
-### Múltiples Vaults (entornos en la misma máquina)
+### Multiple Vaults (environments on the same machine)
 
-Si querés separar secretos por contexto —por ejemplo `trabajo`, `personal`, `cliente-X`— podés tener **varios vaults independientes** en la misma máquina. Cada uno es un archivo SQLite separado con su propia contraseña maestra.
+If you want to separate secrets by context — for example, `work`, `personal`, `client-X` — you can have **several independent vaults** on the same machine. Each is a separate SQLite file with its own master password.
 
 ```bash
-# Listar los vaults disponibles y ver cuál está activo
+# List available vaults and see which one is active
 vlt vault list
 
-# Crear un vault nuevo
-vlt vault create trabajo
+# Create a new vault
+vlt vault create work
 
-# Cambiar el vault activo (los comandos siguientes operan sobre él)
-vlt vault switch trabajo
+# Switch active vault (the following commands operate on it)
+vlt vault switch work
 
-# Eliminar un vault
-vlt vault remove cliente-X
+# Delete a vault
+vlt vault remove client-X
 ```
 
-> Cada vault se desbloquea con SU propia contraseña maestra y no comparte secretos con los demás. Para compartir un mismo conjunto de secretos entre **dispositivos distintos**, no uses vaults separados: usá la sincronización (ver más abajo).
+> Each vault is unlocked with ITS OWN master password and does not share secrets with the others. To share the same set of secrets across **different devices**, do not use separate vaults: use synchronization (see below).
 
-### Inspección (Sin Almacenar)
+### Inspection (Without Storing)
 
-Analiza un archivo sin guardarlo en el vault:
+Analyze a file without saving it to the vault:
 
 ```bash
 vlt inspect cert.pem
 vlt inspect --json cert.pem
 ```
 
-### Auditoría de Seguridad
+### Security Audit
 
-Verifica la salud de tu vault:
+Verify your vault's health:
 
 ```bash
 vlt audit
 ```
 
-### Bloqueo y Desbloqueo
+### Locking and Unlocking
 
-*   **Bloquear (cerrar el vault / olvidar la sesión del daemon):**
+*   **Lock (close the vault / forget daemon session):**
     ```bash
     vlt lock
     ```
 
-*   **Desbloquear:** no hay un comando aparte. El desbloqueo se solicita **automáticamente** la primera vez que un comando necesita acceder al vault (te pide la contraseña maestra, o usa Touch ID en la GUI de macOS).
+*   **Unlock:** there is no separate command. Unlocking is requested **automatically** the first time a command needs to access the vault (prompts for the master password, or uses Touch ID in the macOS GUI).
 
-### Variables de Entorno
+### Environment Variables
 
-*   `PASSWD_MASTER_PASSWORD`: Para scripts y CI.
+*   `PASSWD_MASTER_PASSWORD`: For scripts and CI.
     ```bash
-    PASSWD_MASTER_PASSWORD=mi-pass vlt list
+    PASSWD_MASTER_PASSWORD=my-pass vlt list
     ```
-*   `--no-env`: Ignorar la variable de entorno por seguridad.
+*   `--no-env`: Ignore the environment variable for security.
 
 ---
 
-## Uso de la GUI (`vlt-gui`)
+## Using the GUI (`vlt-gui`)
 
-`vlt-gui` ofrece una interfaz gráfica nativa con Fyne.
+`vlt-gui` offers a native graphical interface using Fyne.
 
-### Iniciar la GUI
+### Starting the GUI
 
 ```bash
 ./bin/vlt-gui
-# o
+# or
 vlt-gui
 ```
 
-### Desbloqueo
+### Unlocking
 
-Al iniciar, se muestra una pantalla de desbloqueo. En macOS, puedes usar **Touch ID** para desbloquear sin escribir la contraseña maestra.
+Upon starting, an unlock screen is displayed. On macOS, you can use **Touch ID** to unlock without typing the master password.
 
-### Interfaz Principal
+### Main Interface
 
-La interfaz se divide en tres columnas:
+The interface is divided into three columns:
 
-1.  **Barra Lateral Izquierda:** Lista de categorías de secretos (Todos, Contraseñas, Claves API, Certificados, SSH, Notas) y acceso a múltiples vaults (si los usas).
-2.  **Columna Central:** Lista de secretos en la categoría seleccionada.
-3.  **Panel Derecho:** Detalles del secreto seleccionado. Permite editar el nombre, usuario, URL, contraseña (con botón de mostrar/ocultar), TOTP (con contador), y notas.
+1.  **Left Sidebar:** List of secret categories (All, Passwords, API Keys, Certificates, SSH, Notes) and access to multiple vaults (if you use them).
+2.  **Central Column:** List of secrets in the selected category.
+3.  **Right Panel:** Selected secret details. Allows editing name, user, URL, password (with show/hide button), TOTP (with counter), and notes.
 
-### Añadir un Secreto
+### Adding a Secret
 
-*   Haz clic en el botón **"+"** o usa el atajo de teclado.
-*   Selecciona el tipo de secreto (Contraseña, Clave API, Certificado, SSH, Nota).
-*   Rellena los campos. Puedes generar una contraseña segura con el botón del dado (🎲).
+*   Click the **"+"** button or use the keyboard shortcut.
+*   Select the secret type (Password, API Key, Certificate, SSH, Note).
+*   Fill in the fields. You can generate a secure password with the dice button (🎲).
 
 ### Watchtower
 
-Accede al dashboard de seguridad desde el icono de "escudo" en la barra lateral. Identifica:
-*   Contraseñas débiles o duplicadas.
-*   Secretos sin TOTP habilitado.
-*   Certificados próximos a expirar.
+Access the security dashboard from the "shield" icon in the sidebar. It identifies:
+*   Weak or duplicated passwords.
+*   Secrets without TOTP enabled.
+*   Certificates about to expire.
 
 ### Quick Access (`vlt-quick`)
 
-Para un acceso ultra-rápido:
-1.  Ejecuta `./bin/vlt-gui --quick` o activa el popup desde la bandeja del sistema.
-2.  Vincula un atajo de teclado global (ej. `Shift+Cmd+K`) con herramientas como **macOS Shortcuts**, **Raycast** o **Alfred**.
-3.  Escribe el nombre del secreto y presiona Enter para copiarlo al portapapeles.
+For ultra-fast access:
+1.  Run `./bin/vlt-gui --quick` or activate the popup from the system tray.
+2.  Bind a global keyboard shortcut (e.g., `Shift+Cmd+K`) with tools like **macOS Shortcuts**, **Raycast**, or **Alfred**.
+3.  Type the secret's name and press Enter to copy it to the clipboard.
 
-### Preferencias
+### Preferences
 
-*   **Tema:** Oscuro (por defecto).
-*   **Auto-lock:** Configurable (tiempo de inactividad antes de bloquear).
+*   **Theme:** Dark (default).
+*   **Auto-lock:** Configurable (inactivity time before locking).
 
 ---
 
-## Uso de la TUI (`vlt-tui`)
+## Using the TUI (`vlt-tui`)
 
-`vlt-tui` es una interfaz de usuario en terminal interactiva para quienes prefieren trabajar desde la línea de comandos sin salir de la terminal.
+`vlt-tui` is an interactive terminal user interface for those who prefer to work from the command line without leaving the terminal.
 
-### Iniciar la TUI
+### Starting the TUI
 
 ```bash
 ./bin/vlt-tui
 ```
 
-### Navegación
+### Navigation
 
-*   Usa las **flechas** para navegar por la lista de secretos.
-*   Presiona **Enter** para ver los detalles del secreto seleccionado.
-*   Presiona **Tab** para cambiar entre paneles.
-*   Presiona **Esc** para volver o cerrar diálogos.
+*   Use **arrow keys** to navigate the secret list.
+*   Press **Enter** to view the selected secret details.
+*   Press **Tab** to switch between panels.
+*   Press **Esc** to go back or close dialogs.
 
-### Acciones
+### Actions
 
-*   **a**: Añadir un nuevo secreto.
-*   **e**: Editar el secreto seleccionado.
-*   **d**: Eliminar el secreto seleccionado.
-*   **Ctrl+f**: Buscar secretos.
-*   **Ctrl+l**: Bloquear el vault.
-*   **q**: Salir de la TUI.
+*   **a**: Add a new secret.
+*   **e**: Edit the selected secret.
+*   **d**: Delete the selected secret.
+*   **Ctrl+f**: Search secrets.
+*   **Ctrl+l**: Lock the vault.
+*   **q**: Quit the TUI.
 
 ---
 
-## Sincronización (múltiples entornos)
+## Synchronization (multiple environments)
 
-`vlt` sincroniza el mismo vault entre varios dispositivos de forma **zero-knowledge** contra un servidor `vlt-sync` auto-hosteable.
+`vlt` synchronizes the same vault across multiple devices in a **zero-knowledge** manner against a self-hostable `vlt-sync` server.
 
-### Conceptos
+### Concepts
 
-*   **Servidor `vlt-sync`:** servidor auto-hosteable que solo almacena un **blob cifrado** por vault. Nunca ve tus secretos en texto plano.
-*   **`sync_encryption_key`:** clave AES-256 que cifra el blob. Se genera en tu dispositivo durante `sync init` y se guarda **dentro de tu vault**, envuelta con tu contraseña maestra.
-*   **API key:** se genera en el cliente durante `sync init` (el servidor solo guarda su hash SHA-256). Sirve para autenticar tus `push`/`pull`.
-*   **Modelo de confianza:** el cliente no confía en el servidor. Un servidor malicioso no puede leer tus secretos, ni resucitar uno borrado (tombstones), ni hacerte retroceder a un estado viejo (chequeo de secuencia monotónica).
+*   **`vlt-sync` server:** self-hostable server that only stores one **encrypted blob** per vault. It never sees your plaintext secrets.
+*   **`sync_encryption_key`:** AES-256 key that encrypts the blob. It is generated on your device during `sync init` and saved **inside your vault**, wrapped with your master password.
+*   **API key:** generated on the client during `sync init` (the server only stores its SHA-256 hash). Used to authenticate your `push`/`pull` requests.
+*   **Trust model:** the client does not trust the server. A malicious server cannot read your secrets, resurrect a deleted one (tombstones), or force you back to an old state (monotonic sequence check).
 
 ### Quick path
 
 ```bash
-# 1. (Una vez) Configurar la sincronización en el PRIMER dispositivo
-vlt sync init --server https://tu-servidor.com
+# 1. (Once) Configure sync on the FIRST device
+vlt sync init --server https://your-server.com
 
-# 2. Subir el estado local al servidor
+# 2. Push local state to the server
 vlt sync push
 
-# 3. En otro momento / dispositivo, traer los cambios
+# 3. Later / on another device, pull changes
 vlt sync pull
 
-# 4. Ver el estado de sincronización
+# 4. View sync status
 vlt sync status
 ```
 
-> Para HTTP sin TLS (solo redes de confianza / pruebas) agregá `--insecure`. En producción usá siempre `https://`.
+> For HTTP without TLS (trusted networks / testing only), add `--insecure`. In production, always use `https://`.
 
-### Configurar un segundo dispositivo (mismo vault)
+### Configuring a second device (same vault)
 
-La `sync_encryption_key` y la API key viven **dentro del archivo del vault**. Por eso, para sincronizar el **mismo** conjunto de secretos en otra máquina, **no** corras `vlt init` ni `sync init` de nuevo (eso crearía un vault distinto y el `sync init` repetido es rechazado por el servidor). En su lugar:
+The `sync_encryption_key` and API key live **inside the vault file**. Therefore, to sync the **same** set of secrets on another machine, do **not** run `vlt init` or `sync init` again (this would create a different vault, and a repeated `sync init` is rejected by the server). Instead:
 
-1.  Copiá el archivo del vault (`*.sqlite`) del primer dispositivo al segundo, a la misma ruta de config (ver [Conceptos Clave](#conceptos-clave)). Por ejemplo con `scp`.
-2.  En el segundo dispositivo, desbloqueá con la **misma contraseña maestra** y traé los cambios:
+1.  Copy the vault file (`*.sqlite`) from the first device to the second, to the same config path (see [Key Concepts](#key-concepts)). For example, with `scp`.
+2.  On the second device, unlock with the **same master password** and pull the changes:
     ```bash
     vlt sync pull
     ```
-3.  A partir de ahí, ambos dispositivos comparten el vault: `push` para subir, `pull` para bajar.
+3.  From then on, both devices share the vault: `push` to upload, `pull` to download.
 
-> El vault copiado ya contiene `vault_uuid`, `sync_encryption_key` y la API key (todo cifrado con tu master key), así que el segundo dispositivo queda listo sin re-registrar nada.
+> The copied vault already contains the `vault_uuid`, `sync_encryption_key`, and API key (all encrypted with your master key), so the second device is ready without re-registering anything.
 
-### Recuperar la API key
+### Recover API key
 
 ```bash
 vlt sync show-key
 ```
 
-### Referencia de comandos
+### Command reference
 
-| Comando | Qué hace |
+| Command | What it does |
 |---|---|
-| `vlt sync init --server <url>` | Genera el UUID del vault, la `sync_encryption_key` y la API key; registra el vault en el servidor. |
-| `vlt sync push` | Cifra el vault y lo sube (concurrencia optimista por número de secuencia). |
-| `vlt sync pull` | Baja el blob, verifica integridad y secuencia, y fusiona (last-writer-wins con tombstones). |
-| `vlt sync status` | Muestra el estado de sincronización (acepta `--json`). |
-| `vlt sync show-key` | Revela la API key almacenada. |
+| `vlt sync init --server <url>` | Generates the vault UUID, `sync_encryption_key`, and API key; registers the vault on the server. |
+| `vlt sync push` | Encrypts the vault and uploads it (optimistic concurrency via sequence number). |
+| `vlt sync pull` | Downloads the blob, verifies integrity and sequence, and merges (last-writer-wins with tombstones). |
+| `vlt sync status` | Shows sync status (accepts `--json`). |
+| `vlt sync show-key` | Reveals the stored API key. |
 
-Para desplegar el servidor (Docker, TLS/Caddy, certificados) consultá [docs/SYNC.md](SYNC.md), [docs/SYNC-FLOW.md](SYNC-FLOW.md) y [docs/TLS-CERTIFICATES.md](TLS-CERTIFICATES.md).
+To deploy the server (Docker, TLS/Caddy, certificates), consult [docs/SYNC-DEPLOYMENT.md](SYNC-DEPLOYMENT.md), [docs/SYNC_API.md](SYNC_API.md), and [docs/TLS-CERTIFICATES.md](TLS-CERTIFICATES.md).
 
 ---
 
-## Resolución de Problemas
+## Troubleshooting
 
-### El vault no se desbloquea
+### Vault won't unlock
 
-*   ¿Olvidaste la contraseña maestra?
-    *   Si tienes un **Kit de Recuperación** (24 palabras), úsalo para restaurar el acceso.
-    *   Si no, el vault es irrecuperable. **Nunca almacenamos la contraseña.**
-*   ¿Estás usando la variable `PASSWD_MASTER_PASSWORD` y `--no-env` al mismo tiempo?
+*   Forgot your master password?
+    *   If you have a **Recovery Kit** (24 words), use it to restore access.
+    *   If not, the vault is unrecoverable. **We never store the password.**
+*   Are you using the `PASSWD_MASTER_PASSWORD` variable and `--no-env` at the same time?
 
-### `vlt-gui` no muestra Touch ID
+### `vlt-gui` does not show Touch ID
 
-*   Asegúrate de que el binario esté **firmado (code signed)**. En macOS, Touch ID requiere Entitlements específicos que se aplican con la firma de código.
-*   Comprueba que el Keychain tenga la entrada correcta.
+*   Make sure the binary is **code signed**. On macOS, Touch ID requires specific Entitlements applied during code signing.
+*   Check that the Keychain has the correct entry.
 
-### Error al importar
+### Import error
 
-*   **"unsupported file format":** `import` solo acepta archivos `.csv` o `.json` (o una imagen con `--qr`). Renombrá o convertí el archivo.
-*   **Registros omitidos:** cada registro necesita al menos un nombre y un password; los que no los tienen se descartan. Corré primero `vlt import archivo.csv --dry-run` para ver qué se importaría sin guardar nada.
+*   **"unsupported file format":** `import` only accepts `.csv` or `.json` files (or an image with `--qr`). Rename or convert the file.
+*   **Skipped records:** each record needs at least a name and a password; those without them are discarded. First run `vlt import file.csv --dry-run` to see what would be imported without saving anything.
 
-### Sincronización falla
+### Sync fails
 
-*   ¿El servidor `vlt-sync` está corriendo y es accesible en la URL configurada?
-*   **"rollback detected":** el servidor devolvió un estado más viejo que el local. Es una protección anti-retroceso; revisá que apuntes al servidor correcto y que no haya un blob desactualizado.
-*   **Conflicto de secuencia (409):** alguien subió cambios antes que vos. `push` hace un `pull` automático y reintenta una vez; si vuelve a fallar, corré `vlt sync pull` manualmente y volvé a intentar.
-*   **Segundo dispositivo no ve los secretos:** asegurate de haber **copiado el archivo del vault** (no de haber corrido `sync init` de nuevo) y de desbloquear con la misma contraseña maestra.
+*   Is the `vlt-sync` server running and accessible at the configured URL?
+*   **"rollback detected":** the server returned an older state than the local one. This is an anti-rollback protection; verify you are pointing to the correct server and there isn't an outdated blob.
+*   **Sequence conflict (409):** someone pushed changes before you. `push` performs an automatic `pull` and retries once; if it fails again, manually run `vlt sync pull` and try again.
+*   **Second device does not see secrets:** ensure you have **copied the vault file** (not run `sync init` again) and unlock with the same master password.
 
-### Comandos de Diagnóstico
+### Diagnostic Commands
 
-*   **Versión:**
+*   **Version:**
     ```bash
     vlt version
     ```
-*   **Verificar estado del vault:**
+*   **Check vault health:**
     ```bash
     vlt check
     ```
-*   **Linting y pruebas:**
+*   **Linting and testing:**
     ```bash
     make lint
     make test

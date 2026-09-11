@@ -1,47 +1,49 @@
-# Roadmap y Plan de Arquitectura: Aplicación Móvil (iOS / Android)
+# Roadmap and Architecture Plan: Mobile Application (iOS / Android)
 
-Este documento establece el plan técnico, las consideraciones de seguridad y la lista de tareas (TODO) para extender el ecosistema `vlt` hacia dispositivos móviles.
+[English](MOBILE-ROADMAP.md) | [Español](es/MOBILE-ROADMAP.md)
+
+This document establishes the technical plan, security considerations, and the task list (TODO) for extending the `vlt` ecosystem to mobile devices.
 
 ---
 
-## 1. Consideraciones Críticas de Seguridad Móvil
+## 1. Critical Mobile Security Considerations
 
-| Área | Riesgo / Requisito | Solución Arquitectónica |
+| Area | Risk / Requirement | Architectural Solution |
 | :--- | :--- | :--- |
-| **Criptografía** | Riesgo de desincronización si se reescribe el cifrado. | **Core Compartido en Go**: Compilar `internal/crypto`, `internal/store` y `internal/sync` vía `gomobile` / C-FFI en un binario unificado (`.xcframework` / `.aar`). |
-| **Biometría (FaceID / TouchID)** | Evitar pedir la clave maestra en cada uso sin comprometer la seguridad. | **Secure Enclave / Android Keystore**: Tras el primer desbloqueo, derivar una clave secundaria envuelta en hardware con flags `kSecAccessControlBiometryAny`. |
-| **Memoria en Reposo** | Fuga de contraseñas cuando la app pasa a segundo plano. | **Zeroize en background**: Limpiar las estructuras de datos en memoria y bloquear la bóveda inmediatamente al entrar en background. |
-| **Capturas de Pantalla** | Robo de contraseñas mediante screenshots o grabación de pantalla. | **FLAG_SECURE (Android)** y **Ocultamiento de ventana en `sceneWillResignActive` (iOS)** con pantalla borrosa/placeholder. |
-| **Portapapeles** | Contraseñas que permanecen indefinidamente en el clipboard. | **Auto-clear timer**: Limpiar el portapapeles automáticamente a los 30 o 45 segundos de haber copiado un secreto. |
+| **Cryptography** | Desynchronization risk if encryption is rewritten. | **Shared Go Core**: Compile `internal/crypto`, `internal/store` and `internal/sync` via `gomobile` / C-FFI into a unified binary (`.xcframework` / `.aar`). |
+| **Biometrics (FaceID / TouchID)** | Avoid asking for the master key on each use without compromising security. | **Secure Enclave / Android Keystore**: After the first unlock, derive a secondary key wrapped in hardware with `kSecAccessControlBiometryAny` flags. |
+| **Memory at Rest** | Password leakage when the app goes into the background. | **Background Zeroize**: Clear data structures in memory and lock the vault immediately upon entering the background. |
+| **Screenshots** | Password theft via screenshots or screen recording. | **FLAG_SECURE (Android)** and **Window hiding in `sceneWillResignActive` (iOS)** with blurred screen/placeholder. |
+| **Clipboard** | Passwords remaining indefinitely in the clipboard. | **Auto-clear timer**: Automatically clear the clipboard 30 or 45 seconds after a secret is copied. |
 
 ---
 
-## 2. TODO y Plan de Fases
+## 2. TODO and Phase Plan
 
-### Fase 1: Onboarding y Emparejamiento por QR
-- [ ] **1.1** Implementar comando CLI `vlt sync export-qr` para generar un QR de emparejamiento con el payload de sincronización.
-- [ ] **1.2** Agregar botón "Vincular Dispositivo Móvil" en `vlt-gui` que muestre el código QR en pantalla.
-- [ ] **1.3** Definir el esquema del payload QR (URL del servidor, `vault_uuid`, `api_key`, `sync_encryption_key`).
+### Phase 1: Onboarding and QR Pairing
+- [ ] **1.1** Implement CLI command `vlt sync export-qr` to generate a pairing QR with the sync payload.
+- [ ] **1.2** Add "Link Mobile Device" button in `vlt-gui` that displays the QR code on screen.
+- [ ] **1.3** Define the QR payload schema (Server URL, `vault_uuid`, `api_key`, `sync_encryption_key`).
 
-### Fase 2: Paquete Puente (Bridge) en Go
-- [ ] **2.1** Crear el paquete `pkg/bridge` con interfaz C-compatible / `gomobile` para:
+### Phase 2: Bridge Package in Go
+- [ ] **2.1** Create the `pkg/bridge` package with C-compatible interface / `gomobile` for:
   - `UnlockVault(password string) -> sessionHandle`
   - `SearchSecrets(query string) -> JSON`
   - `GetSecret(id string) -> JSON`
   - `SaveSecret(secretJSON string) -> error`
   - `SyncVault() -> error`
-- [ ] **2.2** Automatizar la compilación de `.xcframework` (iOS) y `.aar` (Android) en el `Makefile`.
+- [ ] **2.2** Automate `.xcframework` (iOS) and `.aar` (Android) compilation in the `Makefile`.
 
-### Fase 3: Interfaz de la App Móvil
-- [ ] **3.1** Diseñar la UI móvil (Lista de secretos, Búsqueda rápida, Detalle de contraseña, Generador OTP).
-- [ ] **3.2** Integrar escaneo de códigos QR con la cámara del dispositivo para importación y 2FA/TOTP.
-- [ ] **3.3** Implementar el flujo biométrico con bloqueo automático por temporizador de inactividad (1 min, 5 min, inmediato).
+### Phase 3: Mobile App Interface
+- [ ] **3.1** Design mobile UI (Secrets list, Quick search, Password detail, OTP Generator).
+- [ ] **3.2** Integrate QR code scanning with the device camera for imports and 2FA/TOTP.
+- [ ] **3.3** Implement biometric flow with automatic idle timeout locking (1 min, 5 min, immediate).
 
-### Fase 4: Extensión de Auto-Rellenado (Autofill Provider)
-- [ ] **4.1** Implementar `CredentialProviderExtension` en iOS para Safari y apps nativas.
-- [ ] **4.2** Implementar `AutofillService` en Android.
-- [ ] **4.3** Asegurar que la extensión de Autofill consulte la base de datos local en <50ms mediante índices HMAC ciegos.
+### Phase 4: Autofill Provider Extension
+- [ ] **4.1** Implement `CredentialProviderExtension` on iOS for Safari and native apps.
+- [ ] **4.2** Implement `AutofillService` on Android.
+- [ ] **4.3** Ensure the Autofill extension queries the local database in <50ms using blind HMAC indexes.
 
-### Fase 5: Sincronización en Segundo Plano
-- [ ] **5.1** Sincronización automática de cambios al abrir la app o desbloquear con biometría.
-- [ ] **5.2** Soporte para background fetch silencioso.
+### Phase 5: Background Synchronization
+- [ ] **5.1** Automatic synchronization of changes when opening the app or unlocking with biometrics.
+- [ ] **5.2** Support for silent background fetch.

@@ -1,10 +1,12 @@
 # API Reference — vlt-sync
 
-Servidor de sincronización zero-knowledge para `vlt`. Almacena blobs encriptados de vaults de clientes; nunca tiene acceso a los secretos en texto plano.
+[English](SYNC_API.md) | [Español](es/SYNC_API.md)
 
-**Base URL**: `https://your-server.com` (por defecto puerto `:8443`)
+Zero-knowledge synchronization server for `vlt`. It stores encrypted client vault blobs; it never has access to plaintext secrets.
 
-**Nota de seguridad**: Todas las comunicaciones deben realizarse sobre HTTPS/TLS. El servidor está diseñado para ejecutarse detrás de un proxy inverso (ej. Caddy, Nginx) que maneje la terminación TLS.
+**Base URL**: `https://your-server.com` (default port `:8443`)
+
+**Security Note**: All communications must be over HTTPS/TLS. The server is designed to run behind a reverse proxy (e.g., Caddy, Nginx) that handles TLS termination.
 
 ---
 
@@ -12,15 +14,15 @@ Servidor de sincronización zero-knowledge para `vlt`. Almacena blobs encriptado
 
 ### API Key Authentication
 
-Todos los endpoints protegidos (excepto `/v1/register`) requieren el header `Authorization`:
+All protected endpoints (except `/v1/register`) require the `Authorization` header:
 
 ```http
 Authorization: Bearer <api_key>
 ```
 
-*   **Formato del API Key**: `<vault_uuid>:<key_hash>`
-*   **`<key_hash>`**: Hash SHA-256 de la clave API real.
-*   El servidor verifica que el `key_hash` pertenezca a un `vault_uuid` válido antes de procesar la solicitud.
+*   **API Key Format**: `<vault_uuid>:<key_hash>`
+*   **`<key_hash>`**: SHA-256 hash of the real API key.
+*   The server verifies that the `key_hash` belongs to a valid `vault_uuid` before processing the request.
 
 ---
 
@@ -30,9 +32,9 @@ Authorization: Bearer <api_key>
 
 #### `GET /healthz`
 
-Health check básico. No requiere autenticación.
+Basic health check. Does not require authentication.
 
-**Respuesta**:
+**Response**:
 ```json
 {
   "status": "ok"
@@ -43,17 +45,17 @@ Health check básico. No requiere autenticación.
 
 #### `GET /readyz`
 
-Verifica si el servidor está listo para aceptar solicitudes (base de datos accesible).
+Verifies if the server is ready to accept requests (database accessible).
 
-**Respuesta**:
+**Response**:
 ```json
 {
   "status": "ok"
 }
 ```
 
-**Código de error**:
-*   `503 Service Unavailable` — si el store no está inicializado.
+**Error Code**:
+*   `503 Service Unavailable` — if the store is not initialized.
 
 ---
 
@@ -61,7 +63,7 @@ Verifica si el servidor está listo para aceptar solicitudes (base de datos acce
 
 #### `POST /v1/register`
 
-Registra un nuevo vault y genera un API key para autenticación futura.
+Registers a new vault and generates an API key for future authentication.
 
 **Request**:
 ```json
@@ -71,7 +73,7 @@ Registra un nuevo vault y genera un API key para autenticación futura.
 }
 ```
 
-**Respuesta** (201 Created):
+**Response** (201 Created):
 ```json
 {
   "vault_uuid": "string",
@@ -79,22 +81,22 @@ Registra un nuevo vault y genera un API key para autenticación futura.
 }
 ```
 
-**Códigos de error**:
-*   `400 Bad Request` — cuerpo inválido o campos faltantes.
+**Error Codes**:
+*   `400 Bad Request` — invalid body or missing fields.
     ```json
     {
       "error": "vault_uuid is required",
       "code": 400
     }
     ```
-*   `409 Conflict` — el vault ya existe.
+*   `409 Conflict` — vault already exists.
     ```json
     {
       "error": "vault already exists",
       "code": 409
     }
     ```
-*   `429 Too Many Requests` — rate limit excedido (5 registros por IP por hora).
+*   `429 Too Many Requests` — rate limit exceeded (5 registrations per IP per hour).
     ```json
     {
       "error": "registration rate limit exceeded",
@@ -108,9 +110,9 @@ Registra un nuevo vault y genera un API key para autenticación futura.
 
 #### `POST /v1/revoke`
 
-Revoca un API key, invalidando el acceso del cliente correspondiente.
+Revokes an API key, invalidating the corresponding client's access.
 
-**Headers requeridos**: `Authorization: Bearer <api_key>`
+**Required Headers**: `Authorization: Bearer <api_key>`
 
 **Request**:
 ```json
@@ -119,17 +121,17 @@ Revoca un API key, invalidando el acceso del cliente correspondiente.
 }
 ```
 
-**Respuesta** (200 OK):
+**Response** (200 OK):
 ```json
 {
   "status": "ok"
 }
 ```
 
-**Códigos de error**:
-*   `400 Bad Request` — cuerpo inválido o `key_hash` faltante.
-*   `401 Unauthorized` — API key inválida o no proporcionada.
-*   `404 Not Found` — la `key_hash` no existe.
+**Error Codes**:
+*   `400 Bad Request` — invalid body or missing `key_hash`.
+*   `401 Unauthorized` — invalid or missing API key.
+*   `404 Not Found` — the `key_hash` does not exist.
 
 ---
 
@@ -137,12 +139,12 @@ Revoca un API key, invalidando el acceso del cliente correspondiente.
 
 #### `POST /v1/vaults/{uuid}/push`
 
-Sube un blob encriptado del vault al servidor.
+Uploads an encrypted vault blob to the server.
 
-**Headers requeridos**: `Authorization: Bearer <api_key>`
+**Required Headers**: `Authorization: Bearer <api_key>`
 
-**Parámetros de path**:
-*   `uuid` — UUID del vault.
+**Path Parameters**:
+*   `uuid` — UUID of the vault.
 
 **Request**:
 ```json
@@ -152,10 +154,10 @@ Sube un blob encriptado del vault al servidor.
 }
 ```
 
-*   `seq`: Número de secuencia del cliente (para control de versiones y detección de conflictos).
-*   `blob`: Datos del vault encriptados con la `sync_encryption_key` del cliente, luego codificados en base64.
+*   `seq`: Client sequence number (for version control and conflict detection).
+*   `blob`: Vault data encrypted with the client's `sync_encryption_key`, then base64-encoded.
 
-**Respuesta** (200 OK):
+**Response** (200 OK):
 ```json
 {
   "seq": 124,
@@ -163,33 +165,33 @@ Sube un blob encriptado del vault al servidor.
 }
 ```
 
-El servidor incrementa la secuencia y la devuelve.
+The server increments the sequence and returns it.
 
-**Códigos de error**:
-*   `400 Bad Request` — cuerpo inválido o `blob` vacío.
-*   `401 Unauthorized` — API key no válida o no autorizada para este vault.
-*   `404 Not Found` — el vault no existe.
-*   `409 Conflict` — `seq` no coincide (el servidor tiene una versión más reciente; el cliente debe hacer `pull` primero).
+**Error Codes**:
+*   `400 Bad Request` — invalid body or empty `blob`.
+*   `401 Unauthorized` — invalid API key or not authorized for this vault.
+*   `404 Not Found` — vault does not exist.
+*   `409 Conflict` — `seq` mismatch (the server has a more recent version; the client must pull first).
     ```json
     {
       "error": "sequence mismatch: pull latest first",
       "code": 409
     }
     ```
-*   `413 Request Entity Too Large` — `blob` excede el límite de tamaño (10 MB).
+*   `413 Request Entity Too Large` — `blob` exceeds size limit (10 MB).
 
 ---
 
 #### `GET /v1/vaults/{uuid}/pull`
 
-Descarga el blob encriptado del vault desde el servidor.
+Downloads the encrypted vault blob from the server.
 
-**Headers requeridos**: `Authorization: Bearer <api_key>`
+**Required Headers**: `Authorization: Bearer <api_key>`
 
-**Parámetros de path**:
-*   `uuid` — UUID del vault.
+**Path Parameters**:
+*   `uuid` — UUID of the vault.
 
-**Respuesta** (200 OK):
+**Response** (200 OK):
 ```json
 {
   "seq": 124,
@@ -197,22 +199,22 @@ Descarga el blob encriptado del vault desde el servidor.
 }
 ```
 
-**Códigos de error**:
-*   `401 Unauthorized` — API key no válida o no autorizada para este vault.
-*   `404 Not Found` — el vault no existe o no tiene datos (`no blob for this vault`).
+**Error Codes**:
+*   `401 Unauthorized` — invalid API key or not authorized for this vault.
+*   `404 Not Found` — vault does not exist or has no data (`no blob for this vault`).
 
 ---
 
 #### `GET /v1/vaults/{uuid}/status`
 
-Obtiene metadatos del vault en el servidor (sin el contenido del blob).
+Retrieves vault metadata from the server (without the blob content).
 
-**Headers requeridos**: `Authorization: Bearer <api_key>`
+**Required Headers**: `Authorization: Bearer <api_key>`
 
-**Parámetros de path**:
-*   `uuid` — UUID del vault.
+**Path Parameters**:
+*   `uuid` — UUID of the vault.
 
-**Respuesta** (200 OK):
+**Response** (200 OK):
 ```json
 {
   "vault_uuid": "550e8400-e29b-41d4-a716-446655440000",
@@ -221,27 +223,27 @@ Obtiene metadatos del vault en el servidor (sin el contenido del blob).
 }
 ```
 
-**Códigos de error**:
-*   `401 Unauthorized` — API key no válida o no autorizada para este vault.
-*   `404 Not Found` — el vault no existe.
+**Error Codes**:
+*   `401 Unauthorized` — invalid API key or not authorized for this vault.
+*   `404 Not Found` — vault does not exist.
 
 ---
 
 ## Rate Limiting
 
-| Endpoint | Límite | Ventana |
-|----------|--------|---------|
-| `POST /v1/register` | 5 requests | Por IP, por hora |
-| `POST /v1/revoke` | 10 requests | Por API key, por minuto |
-| Otros endpoints | 100 requests | Por API key, por minuto |
+| Endpoint | Limit | Window |
+|----------|-------|--------|
+| `POST /v1/register` | 5 requests | Per IP, per hour |
+| `POST /v1/revoke` | 10 requests | Per API key, per minute |
+| Other endpoints | 100 requests | Per API key, per minute |
 
-Cuando se excede el rate limit, el servidor devuelve `429 Too Many Requests` con el header `Retry-After` indicando los segundos restantes.
+When the rate limit is exceeded, the server returns `429 Too Many Requests` with the `Retry-After` header indicating the remaining seconds.
 
 ---
 
 ## Error Responses
 
-Todos los endpoints de error devuelven JSON con la siguiente estructura:
+All error endpoints return JSON with the following structure:
 
 ```json
 {
@@ -250,32 +252,32 @@ Todos los endpoints de error devuelven JSON con la siguiente estructura:
 }
 ```
 
-Los códigos de estado HTTP usados son:
+HTTP status codes used:
 
-*   `400 Bad Request` — Solicitud mal formada.
-*   `401 Unauthorized` — Autenticación fallida.
-*   `404 Not Found` — Recurso no encontrado.
-*   `409 Conflict` — Conflicto de estado (ej. seq mismatch).
-*   `413 Request Entity Too Large` — Payload demasiado grande.
-*   `429 Too Many Requests` — Rate limit excedido.
-*   `500 Internal Server Error` — Error interno del servidor.
+*   `400 Bad Request` — Malformed request.
+*   `401 Unauthorized` — Authentication failed.
+*   `404 Not Found` — Resource not found.
+*   `409 Conflict` — State conflict (e.g., seq mismatch).
+*   `413 Request Entity Too Large` — Payload too large.
+*   `429 Too Many Requests` — Rate limit exceeded.
+*   `500 Internal Server Error` — Internal server error.
 
 ---
 
 ## Environment Variables
 
-| Variable | Descripción | Default |
+| Variable | Description | Default |
 |----------|-------------|---------|
-| `VLT_SYNC_ADDR` | Dirección y puerto de escucha | `:8443` |
-| `VLT_SYNC_DB_PATH` | Ruta al archivo SQLite del servidor | `./sync-server.db` |
-| `VLT_SYNC_TLS_CERT` | Ruta al certificado TLS (PEM) | (requerido) |
-| `VLT_SYNC_TLS_KEY` | Ruta a la clave privada TLS (PEM) | (requerido) |
+| `VLT_SYNC_ADDR` | Listening address and port | `:8443` |
+| `VLT_SYNC_DB_PATH` | Path to the server's SQLite file | `./sync-server.db` |
+| `VLT_SYNC_TLS_CERT` | Path to TLS certificate (PEM) | (required) |
+| `VLT_SYNC_TLS_KEY` | Path to TLS private key (PEM) | (required) |
 
 ---
 
 ## Example Usage (cURL)
 
-### Registrar un nuevo vault
+### Register a new vault
 
 ```bash
 curl -X POST https://localhost:8443/v1/register \
@@ -286,7 +288,7 @@ curl -X POST https://localhost:8443/v1/register \
   }'
 ```
 
-### Subir datos encriptados (push)
+### Upload encrypted data (push)
 
 ```bash
 curl -X POST https://localhost:8443/v1/vaults/550e8400-e29b-41d4-a716-446655440000/push \
@@ -298,14 +300,14 @@ curl -X POST https://localhost:8443/v1/vaults/550e8400-e29b-41d4-a716-4466554400
   }'
 ```
 
-### Descargar datos (pull)
+### Download data (pull)
 
 ```bash
 curl -X GET https://localhost:8443/v1/vaults/550e8400-e29b-41d4-a716-446655440000/pull \
   -H "Authorization: Bearer 550e8400-e29b-41d4-a716-446655440000:base64_key_hash"
 ```
 
-### Verificar estado del servidor
+### Verify server status
 
 ```bash
 curl -X GET https://localhost:8443/healthz
@@ -315,8 +317,8 @@ curl -X GET https://localhost:8443/healthz
 
 ## Security Notes
 
-*   **Zero-Knowledge**: El servidor almacena únicamente blobs encriptados. No puede desencriptar, leer ni modificar los secretos.
-*   **TLS Obligatorio**: El servidor debe ejecutarse sobre HTTPS/TLS. Se recomienda usar un proxy inverso (Caddy, Nginx) para gestionar certificados.
-*   **API Keys**: Las claves API son UUID-scoped. Un compromiso de una clave solo afecta al vault asociado.
-*   **Rate Limiting**: Protege contra abuso y ataques de fuerza bruta.
-*   **Sequence Control**: El mecanismo de secuencias previene sobrescribir datos más recientes accidentalmente (aunque `vlt sync push --force` puede ignorar este control).
+*   **Zero-Knowledge**: The server only stores encrypted blobs. It cannot decrypt, read, or modify the secrets.
+*   **TLS Mandatory**: The server must run over HTTPS/TLS. It is recommended to use a reverse proxy (Caddy, Nginx) to manage certificates.
+*   **API Keys**: API keys are UUID-scoped. A compromise of one key only affects the associated vault.
+*   **Rate Limiting**: Protects against abuse and brute-force attacks.
+*   **Sequence Control**: The sequence mechanism prevents accidentally overwriting more recent data (though `vlt sync push --force` can bypass this check).

@@ -1,132 +1,134 @@
-# Roadmap de vlt
+# vlt Roadmap
 
-Este documento describe la visión a largo plazo, las características planificadas y el trabajo pendiente del proyecto. Se prioriza la seguridad, la experiencia de usuario y la portabilidad multiplataforma.
+[English](ROADMAP.md) | [Español](es/ROADMAP.md)
 
----
-
-## Visión
-
-`vlt` busca ser el gestor de secretos preferido para desarrolladores individuales y equipos pequeños que valoran:
-
-*   **Control total**: datos almacenados localmente, cero dependencia de servicios en la nube de terceros.
-*   **Seguridad real**: encriptación zero-knowledge, no "security theater".
-*   **Velocidad**: acceso ultra-rápido via CLI, TUI y GUI.
-*   **Portabilidad**: funciona igual en macOS, Linux y Windows.
+This document describes the long-term vision, planned features, and pending work for the project. Security, user experience, and cross-platform portability are prioritized.
 
 ---
 
-## Versiones y Features
+## Vision
 
-### v1.0.0 — Core Vault (Completado ✅)
+`vlt` aims to be the preferred secrets manager for solo developers and small teams who value:
 
-*   Derivación de claves con Argon2id.
-*   Encriptación AES-256-GCM por secreto.
-*   CLI completa con todos los comandos base.
-*   TUI interactiva.
-*   Importación y exportación (CSV, JSON, Bitwarden, KeePass, etc.).
-*   Gestión de certificados (X.509, SSH, PKCS#12).
+*   **Total control**: data stored locally, zero reliance on third-party cloud services.
+*   **Real security**: zero-knowledge encryption, no "security theater".
+*   **Speed**: ultra-fast access via CLI, TUI, and GUI.
+*   **Portability**: works identically on macOS, Linux, and Windows.
 
-### v1.1.0 — GUI + Biometría (Completado ✅)
+---
 
-*   `vlt-gui` nativo con Fyne.
-*   Desbloqueo Touch ID / Face ID (macOS).
+## Versions and Features
+
+### v1.0.0 — Core Vault (Completed ✅)
+
+*   Key derivation with Argon2id.
+*   Per-secret AES-256-GCM encryption.
+*   Full CLI with all base commands.
+*   Interactive TUI.
+*   Import and export (CSV, JSON, Bitwarden, KeePass, etc.).
+*   Certificate management (X.509, SSH, PKCS#12).
+
+### v1.1.0 — GUI + Biometrics (Completed ✅)
+
+*   Native `vlt-gui` using Fyne.
+*   Touch ID / Face ID unlock (macOS).
 *   Quick Access popup (`vlt-quick`).
-*   Dashboard Watchtower (contraseñas débiles, duplicados, certificados expirados).
-*   Tema oscuro glassmorphism.
+*   Watchtower dashboard (weak passwords, duplicates, expired certificates).
+*   Glassmorphism dark theme.
 *   Multi-vault support.
 
-### v1.2.0 — Sync Server (Completado ✅)
+### v1.2.0 — Sync Server (Completed ✅)
 
-*   Servidor de sincronización auto-hosteable (`vlt-sync`).
-*   Sincronización zero-knowledge entre dispositivos.
-*   Autenticación por API key.
-*   Soporte para Docker + Caddy (TLS automático).
-*   Scripts de testing para sincronización.
+*   Self-hostable synchronization server (`vlt-sync`).
+*   Zero-knowledge synchronization between devices.
+*   API key authentication.
+*   Docker + Caddy support (automatic TLS).
+*   Testing scripts for synchronization.
 
-### v1.3.0 — Seguridad y Hardening Criptográfico (Completado ✅)
+### v1.3.0 — Security and Cryptographic Hardening (Completed ✅)
 
-Todas las vulnerabilidades identificadas fueron auditadas y resueltas:
+All identified vulnerabilities were audited and resolved:
 
-#### Tier 1 — Críticos
-* ✅ **S-01**: `sync_encryption_key` y `api_key` cifrados con AES-256-GCM y clave maestra.
-* ✅ **S-02**: Seed TOTP/HOTP cifrado dentro del envelope de metadatos.
-* ✅ **S-06**: Limpieza de portapapeles segura sin pasar secretos en argumentos del proceso.
+#### Tier 1 — Critical
+* ✅ **S-01**: `sync_encryption_key` and `api_key` encrypted with AES-256-GCM and master key.
+* ✅ **S-02**: TOTP/HOTP seed encrypted inside the metadata envelope.
+* ✅ **S-06**: Secure clipboard clearing without passing secrets in process arguments.
 
-#### Tier 2 — Altos
-* ✅ **S-03**: Nombres y metadatos cifrados (`encrypted_name` + blind index HMAC `name_lookup`).
-* ✅ **S-04**: Eliminación de Keychain inseguro; master password explícito y zeroizado en RAM.
-* ✅ **S-05**: Sync con resolución LWW y soporte completo de lápidas (*tombstones*).
-* ✅ **S-12**: Unlock de GUI optimizado a una única derivación Argon2id.
+#### Tier 2 — High
+* ✅ **S-03**: Encrypted names and metadata (`encrypted_name` + blind index HMAC `name_lookup`).
+* ✅ **S-04**: Removal of insecure Keychain; explicit master password zeroized in RAM.
+* ✅ **S-05**: Sync with LWW resolution and full tombstone support.
+* ✅ **S-12**: GUI unlock optimized to a single Argon2id derivation.
 
 #### Tier 3 & 4
-* ✅ **S-07 & S-08**: Servidor de sync con rate-limiting, límite de payload y mTLS Zero-Trust (`tls.RequireAndVerifyClientCert`).
-* ✅ **S-10**: SQLite en modo WAL, `secure_delete = FAST`, permisos `0600`.
-* ✅ **S-11**: AES-GCM con Additional Authenticated Data (AAD) para prevenir transposición de blobs.
-* ✅ **S-13**: Zeroización inmediata de buffers en memoria RAM con `crypto.Zeroize`.
-* ✅ **S-14**: Mnemónico de recuperación conforme a BIP-39 (24 palabras).
+* ✅ **S-07 & S-08**: Sync server with rate-limiting, payload size limits, and Zero-Trust mTLS (`tls.RequireAndVerifyClientCert`).
+* ✅ **S-10**: SQLite in WAL mode, `secure_delete = FAST`, permissions `0600`.
+* ✅ **S-11**: AES-GCM with Additional Authenticated Data (AAD) to prevent blob transposition.
+* ✅ **S-13**: Immediate zeroization of RAM buffers with `crypto.Zeroize`.
+* ✅ **S-14**: BIP-39 compliant recovery mnemonic (24 words).
 
-### v1.4.0 — Motor OTP / Authenticator y Auditoría (Completado ✅)
-* ✅ Implementación RFC 6238 (TOTP) + RFC 4226 (HOTP) en `internal/otp/`.
-* ✅ Decodificación de QR codes e importación automática.
-* ✅ Visualización en tiempo real de cuentas regresivas en GUI y TUI.
-* ✅ Comandos CLI `vlt otp` y soporte en Watchtower.
+### v1.4.0 — OTP Engine / Authenticator and Audit (Completed ✅)
+* ✅ RFC 6238 (TOTP) + RFC 4226 (HOTP) implementation in `internal/otp/`.
+* ✅ QR code decoding and automatic import.
+* ✅ Real-time countdown display in GUI and TUI.
+* ✅ CLI `vlt otp` commands and Watchtower support.
 
-### v1.5.0 — Zero-Trust mTLS y Multiplataforma (Completado ✅)
-* ✅ Generador PKI integrado (`vlt pki generate`, `vlt pki client`) conforme a RFC 5280 y estándares Apple.
-* ✅ Soporte nativo para Windows (`make build-windows`, notificaciones Toast).
-* ✅ Auto-fallback resiliente en configuraciones multi-bóveda.
-* ✅ Sincronización en tiempo real vía SSE con auto-pull y notificaciones de escritorio.
+### v1.5.0 — Zero-Trust mTLS and Cross-platform (Completed ✅)
+* ✅ Integrated PKI generator (`vlt pki generate`, `vlt pki client`) compliant with RFC 5280 and Apple standards.
+* ✅ Native Windows support (`make build-windows`, Toast notifications).
+* ✅ Resilient auto-fallback in multi-vault configurations.
+* ✅ Real-time synchronization via SSE with auto-pull and desktop notifications.
 
-### v1.5.0 — Análisis y Auditoría (Planificado 📋)
+### v1.5.0 — Analysis and Auditing (Planned 📋)
 
-| Feature | Descripción | Referencia |
+| Feature | Description | Reference |
 |---------|-------------|------------|
-| **Password Strength Analysis** | Análisis profundo de contraseñas con `zxcvbn` | `openspec/changes/extend-check-password-analysis/` |
-| **Breach Detection** | Integración con APIs de haveibeenpwned (k-anonymity) | Propuesta |
-| **Certificate Chain Validation** | Validación de cadenas de certificados | Propuesta |
-| **SSH Known Hosts Analysis** | Detección de claves comprometidas en known_hosts | Propuesta |
+| **Password Strength Analysis** | Deep password analysis with `zxcvbn` | `openspec/changes/extend-check-password-analysis/` |
+| **Breach Detection** | Integration with haveibeenpwned APIs (k-anonymity) | Proposal |
+| **Certificate Chain Validation** | Certificate chain validation | Proposal |
+| **SSH Known Hosts Analysis** | Detection of compromised keys in known_hosts | Proposal |
 
-### v1.6.0 — UX / Accesibilidad (Planificado 📋)
+### v1.6.0 — UX / Accessibility (Planned 📋)
 
-| Issue | Descripción | Referencia |
+| Issue | Description | Reference |
 |-------|-------------|------------|
-| U-01 | Sin indicador de progreso durante unlock | `ISSUES.md` |
-| U-02 | `vlt get` imprime a stdout por defecto (invertir a clipboard) | `ISSUES.md` |
-| U-03 | Warning de password débil después de confirmación | `ISSUES.md` |
-| U-04 | Watchtower sin acciones "Rotate" contextuales | `ISSUES.md` |
-| U-05 | Recovery kit solo se muestra una vez | `ISSUES.md` |
-| U-06 | Mensaje genérico "decryption failed" | `ISSUES.md` |
-| U-07 | GUI sin auto-lock por inactividad | `ISSUES.md` |
-| U-08 | README sobre-promete biometría | `ISSUES.md` |
+| U-01 | No progress indicator during unlock | `ISSUES.md` |
+| U-02 | `vlt get` prints to stdout by default (invert to clipboard) | `ISSUES.md` |
+| U-03 | Weak password warning after confirmation | `ISSUES.md` |
+| U-04 | Watchtower missing contextual "Rotate" actions | `ISSUES.md` |
+| U-05 | Recovery kit only shown once | `ISSUES.md` |
+| U-06 | Generic "decryption failed" message | `ISSUES.md` |
+| U-07 | GUI missing idle auto-lock | `ISSUES.md` |
+| U-08 | README over-promises biometrics | `ISSUES.md` |
 
-### v2.0.0 — Ecosistema y Mobile (Futuro 🔮)
+### v2.0.0 — Ecosystem and Mobile (Future 🔮)
 
-*   **Mobile app**: App nativa (React Native o Flutter) para iOS/Android con sync server.
-*   **CLI Plugin System**: Extensibilidad para comandos personalizados.
-*   **Secret Sharing**: Compartir secretos de forma segura (e.g., "este secreto expira en 24h").
-*   **Audit Logs**: Registro inmutable de acceso a secretos (local).
-*   **Team Vaults**: Modelo multi-usuario con clave compartida (sin servidor centralizado).
+*   **Mobile app**: Native app (React Native or Flutter) for iOS/Android with sync server.
+*   **CLI Plugin System**: Extensibility for custom commands.
+*   **Secret Sharing**: Secure secret sharing (e.g., "this secret expires in 24h").
+*   **Audit Logs**: Immutable log of secret access (local).
+*   **Team Vaults**: Multi-user model with shared key (without a centralized server).
 
 ---
 
-## Infraestructura y tooling
+## Infrastructure and Tooling
 
-| Área | Estado | Notas |
+| Area | Status | Notes |
 |------|--------|-------|
-| CI/CD | ✅ | Tests, linting, build multi-plataforma |
-| Docker image | ✅ | `Dockerfile` para `vlt-sync` |
-| Documentación | 🚧 | En progreso — `ARCHITECTURE.md`, `USER_GUIDE.md`, `CONTRIBUTING.md` |
-| OpenSpec SDD | ✅ | Artefactos completos para cambios significativos |
-| Cobertura de tests | 🚧 | Alta cobertura en `cli`, `store`, `crypto`; mejorar en `sync` y `gui` |
-| Seguridad | 🚧 | Auditoría completada; correcciones pendientes (v1.3.0) |
+| CI/CD | ✅ | Tests, linting, cross-platform build |
+| Docker image | ✅ | `Dockerfile` for `vlt-sync` |
+| Documentation | 🚧 | In progress — `ARCHITECTURE.md`, `USER_GUIDE.md`, `CONTRIBUTING.md` |
+| OpenSpec SDD | ✅ | Complete artifacts for significant changes |
+| Test coverage | 🚧 | High coverage in `cli`, `store`, `crypto`; improve in `sync` and `gui` |
+| Security | 🚧 | Audit completed; pending fixes (v1.3.0) |
 
 ---
 
-## Cómo leer este roadmap
+## How to read this roadmap
 
-*   **Completado (✅)**: Funcionalidad lista para producción.
-*   **En Progreso (🚧)**: Trabajo activo en esta área.
-*   **Planificado (📋)**: Diseñado y priorizado; implementación pendiente.
-*   **Futuro (🔮)**: Ideas exploratorias sin fecha estimada.
+*   **Completed (✅)**: Feature ready for production.
+*   **In Progress (🚧)**: Active work in this area.
+*   **Planned (📋)**: Designed and prioritized; implementation pending.
+*   **Future (🔮)**: Exploratory ideas with no estimated date.
 
-Los issues de `ISSUES.md` se priorizan en el orden de su编号 (S-01 primero, luego S-02, etc.). Las features en `openspec/` tienen sus propiosartefactos de diseño con tareas detalladas.
+Issues in `ISSUES.md` are prioritized by their ID (S-01 first, then S-02, etc.). Features in `openspec/` have their own design artifacts with detailed tasks.
