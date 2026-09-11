@@ -37,7 +37,7 @@ import (
 )
 
 // Version is the GUI app version.
-const Version = version.Version
+var Version = version.Version
 
 // App provides all vault operations for the GUI.
 // It wraps the existing internal packages and manages the derived key lifecycle.
