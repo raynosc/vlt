@@ -73,3 +73,8 @@ vlt-export.*
 # Local PRDs and packaging guides
 PRD-*.md
 MACOS-*.md
+
+# Scratch and temporary scripts
+scratch/
+tmp/
+*.tmp
