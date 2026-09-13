@@ -490,9 +490,6 @@ func (g *GUI) launchQuick() {
 	}
 
 	w := newQuickWindow(g.fyneApp)
-	w.Resize(fyne.NewSize(600, 460))
-	w.CenterOnScreen()
-	w.SetFixedSize(true)
 	g.quickWindow = w
 	w.SetCloseIntercept(func() {
 		w.Hide()
@@ -503,6 +500,9 @@ func (g *GUI) launchQuick() {
 	})
 
 	if !g.backend.IsUnlocked() {
+		w.Resize(fyne.NewSize(420, 360))
+		w.CenterOnScreen()
+		w.SetFixedSize(true)
 		showQuickUnlock(w, g.backend, func(unlockedBackend *App) {
 			if unlockedBackend != nil {
 				g.backend = unlockedBackend
@@ -519,6 +519,9 @@ func (g *GUI) launchQuick() {
 			}
 		})
 	} else {
+		w.Resize(fyne.NewSize(600, 460))
+		w.CenterOnScreen()
+		w.SetFixedSize(true)
 		showQuickPopup(w, g.backend)
 	}
 
@@ -1588,13 +1591,15 @@ func RunQuick(vaultName string, noKeychain bool) {
 	defer backend.Close()
 
 	window := newQuickWindow(fyneApp)
-	window.Resize(fyne.NewSize(600, 460))
-	window.CenterOnScreen()
 	window.SetFixedSize(true)
 
 	if !backend.IsUnlocked() {
+		window.Resize(fyne.NewSize(420, 360))
+		window.CenterOnScreen()
 		showQuickUnlock(window, backend)
 	} else {
+		window.Resize(fyne.NewSize(600, 460))
+		window.CenterOnScreen()
 		showQuickPopup(window, backend)
 	}
 
@@ -1606,12 +1611,20 @@ func RunQuick(vaultName string, noKeychain bool) {
 // On successful unlock it transitions to the search popup.
 func showQuickUnlock(w fyne.Window, backend *App, onUnlocked ...func(unlockedBackend *App)) {
 	currentBackend := backend
+	appLogo := NewAppIconImage(56)
+
+	title := canvas.NewText("vlt Password Manager", themepkg.Foreground)
+	title.TextSize = 20
+	title.TextStyle = fyne.TextStyle{Bold: true}
+	title.Alignment = fyne.TextAlignCenter
+
+	subtitle := canvas.NewText("Zero-Knowledge Secure Vault", themepkg.Muted)
+	subtitle.TextSize = 13
+	subtitle.Alignment = fyne.TextAlignCenter
+
 	pwEntry := widget.NewEntry()
 	pwEntry.SetPlaceHolder("Master password")
 	pwEntry.Password = true
-
-	header := widget.NewLabelWithStyle("Quick Access", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
-	instruction := widget.NewLabel("Enter your master password to unlock.")
 
 	pwEntry.OnSubmitted = func(pw string) {
 		if pw == "" {
@@ -1619,7 +1632,7 @@ func showQuickUnlock(w fyne.Window, backend *App, onUnlocked ...func(unlockedBac
 		}
 		if err := currentBackend.Unlock(pw); err != nil {
 			pwEntry.SetText("")
-			instruction.SetText("Incorrect master password. Please try again.")
+			pwEntry.SetPlaceHolder("Incorrect master password")
 			w.Canvas().Focus(pwEntry)
 			return
 		}
@@ -1638,9 +1651,10 @@ func showQuickUnlock(w fyne.Window, backend *App, onUnlocked ...func(unlockedBac
 		}
 	})
 
-	unlockBtn := widget.NewButton("Unlock", func() {
+	unlockBtn := widget.NewButtonWithIcon("Unlock Vault", theme.ConfirmIcon(), func() {
 		pwEntry.OnSubmitted(pwEntry.Text)
 	})
+	unlockBtn.Importance = widget.HighImportance
 
 	// Discover available enabled vaults
 	vaultInfos, _ := config.ListEnabledVaults()
@@ -1666,6 +1680,7 @@ func showQuickUnlock(w fyne.Window, backend *App, onUnlocked ...func(unlockedBac
 				_ = cfg.SetActiveVault(selected)
 			}
 			pwEntry.SetText("")
+			pwEntry.SetPlaceHolder("Master password")
 			w.Canvas().Focus(pwEntry)
 		})
 		selectWidget.SetSelected(currentBackend.VaultName())
@@ -1678,18 +1693,35 @@ func showQuickUnlock(w fyne.Window, backend *App, onUnlocked ...func(unlockedBac
 		vaultSelector = widget.NewLabel("Vault: " + currentBackend.VaultName())
 	}
 
-	w.SetContent(container.NewBorder(
-		container.NewVBox(header, widget.NewSeparator()),
-		nil, nil, nil,
-		container.NewCenter(container.NewVBox(
-			vaultSelector,
-			instruction,
-			widget.NewLabel(""),
-			pwEntry,
-			widget.NewLabel(""),
-			unlockBtn,
-		)),
-	))
+	formBox := container.NewVBox(
+		container.NewCenter(appLogo),
+		container.NewCenter(title),
+		container.NewCenter(subtitle),
+		widget.NewSeparator(),
+		vaultSelector,
+		pwEntry,
+		unlockBtn,
+	)
+
+	cardBg := canvas.NewRectangle(themepkg.Surface2)
+	cardBg.CornerRadius = sizeCardRadius
+
+	cardBorder := canvas.NewRectangle(color.Transparent)
+	cardBorder.StrokeColor = themepkg.GlassBorder
+	cardBorder.StrokeWidth = 1
+	cardBorder.CornerRadius = sizeCardRadius
+
+	cardWidth := canvas.NewRectangle(color.Transparent)
+	cardWidth.SetMinSize(fyne.NewSize(360, 1))
+
+	unlockCard := container.NewStack(
+		cardBg,
+		cardBorder,
+		cardWidth,
+		container.NewPadded(formBox),
+	)
+
+	w.SetContent(container.NewCenter(unlockCard))
 	w.Canvas().Focus(pwEntry)
 	w.RequestFocus()
 }
