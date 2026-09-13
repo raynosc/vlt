@@ -2,118 +2,110 @@
 
 [English](quick-access.md) | [Español](es/quick-access.md)
 
-`vlt-quick` provides a compact search-as-you-type window for quickly finding and
-copying secret values to the clipboard. It's designed to be bound to a global
-hotkey (e.g., Shift+Cmd+K) for instant access.
+Quick Access provides a compact floating search window for quickly finding and
+copying secret values to the clipboard. It is built directly into the native desktop
+application (`vlt-gui --quick`) and designed to be bound to a global hotkey
+(e.g., `Shift+Cmd+K` or `Shift+Cmd+Space`) for instant access from anywhere.
 
 ## Usage
 
 ```bash
-# Via the vlt CLI:
-vlt quick
+# Launch Quick Access popup:
+vlt-gui --quick
 
-# Standalone binary:
-vlt-quick
+# Or via Makefile:
+make run-quick
 
-# Custom socket path:
-vlt quick --socket /tmp/myapp.sock
-vlt-quick --socket /tmp/myapp.sock
+# From macOS application bundle:
+/Applications/vlt.app/Contents/MacOS/vlt --quick
 ```
-
-### Exit Codes
-
-| Code | Meaning              |
-|------|----------------------|
-| 0    | Secret copied        |
-| 1    | Cancelled (Esc)      |
-| 2    | Error                |
 
 ## Keybindings
 
-| Key              | Action              |
-|------------------|---------------------|
-| Type             | Search secrets      |
-| ↑ / ↓            | Navigate results    |
-| Ctrl+J / Ctrl+K  | Navigate results    |
-| Enter            | Copy to clipboard   |
-| Esc              | Close / cancel      |
+| Key              | Action                                       |
+|------------------|----------------------------------------------|
+| Type             | Search secrets (live filtering)              |
+| ↑ / ↓            | Navigate matching results                    |
+| Enter            | Copy selected secret value to clipboard      |
+| Esc              | Close / cancel popup                         |
 
 ## How It Works
 
-1. `vlt-quick` connects to the vlt daemon via Unix socket (`/tmp/vlt.sock` by default)
-2. If the daemon is not running, it auto-starts it in the background
-3. If the vault is locked, it prompts for the master password
-4. Secrets are loaded into a compact TUI with a search bar
-5. Type to filter secrets by name (case-insensitive)
-6. Press Enter to copy the selected secret to clipboard
-7. The window auto-closes after 1 second showing "Copied!"
+1. `vlt-gui --quick` connects via a lightweight local IPC socket (`/tmp/vlt-gui.sock`). If the GUI is already running, it brings the Quick Access popup to the foreground instantly. If not running, it starts in Quick Access mode directly.
+2. If the vault is locked, the popup prompts for the master password right in the compact window without opening the full desktop dashboard.
+3. Secrets are loaded into a compact list with live search-as-you-type filtering.
+4. Pressing **Enter** copies the secret value to the system clipboard and initiates secure auto-clearing via `vlt __clear-clipboard`.
+5. The window automatically closes upon copying or when pressing **Esc**.
 
 ## Setting Up a Global Hotkey (macOS)
 
 ### Option 1: macOS Shortcuts App (Recommended)
 
-1. Open the **Shortcuts** app
+1. Open the **Shortcuts** app.
 2. Create a new shortcut with action **Run Shell Script**:
    ```bash
-   /path/to/vlt-quick
+   /usr/local/bin/vlt-gui --quick
+   # or for .app bundle:
+   /Applications/vlt.app/Contents/MacOS/vlt --quick
    ```
-   (Use the full path, e.g. `~/go/bin/vlt-quick` or `/usr/local/bin/vlt-quick`)
-3. Switch to the **Info** tab (the ⓘ icon)
-4. Check **Use as Quick Action**
-5. Set **Workflow receives** to `no input` in `any application`
-6. Go to **System Settings → Keyboard → Keyboard Shortcuts → Services**
-7. Find your shortcut under **General** and assign Shift+Cmd+K
+3. Switch to the **Info** tab (the ⓘ icon).
+4. Check **Use as Quick Action**.
+5. Set **Workflow receives** to `no input` in `any application`.
+6. Go to **System Settings → Keyboard → Keyboard Shortcuts → Services**.
+7. Find your shortcut under **General** and assign `Shift+Cmd+K`.
 
 ### Option 2: Raycast
 
-1. Open Raycast → Extensions → Create Script Command
-2. Name: `vlt-quick`
+1. Open Raycast → **Extensions** → **Create Script Command**.
+2. Name: `vlt Quick Access`.
 3. Script:
    ```bash
    #!/bin/bash
-   /path/to/vlt-quick
+   /usr/local/bin/vlt-gui --quick
    ```
-4. Assign hotkey Shift+Cmd+K in Raycast settings
+4. Assign hotkey `Shift+Cmd+K` in Raycast settings.
 
 ### Option 3: Alfred
 
-1. Open Alfred → Preferences → Workflows → Create a new workflow
-2. Add a **Hotkey** trigger (set to Shift+Cmd+K)
-3. Add a **Run Script** action (set to `/path/to/vlt-quick`)
-4. Set script type to `/bin/bash` with `with input as argv`
+1. Open Alfred → **Preferences** → **Workflows** → Create a new workflow.
+2. Add a **Hotkey** trigger (e.g. `Shift+Cmd+K`).
+3. Add a **Run Script** action:
+   ```bash
+   /usr/local/bin/vlt-gui --quick
+   ```
+4. Set script type to `/bin/bash` with `with input as argv`.
 
 ### Option 4: Hammerspoon
 
 ```lua
 -- ~/.hammerspoon/init.lua
-hs.hotkey.bind({"shift", "cmd"}, "P", function()
-  hs.task.new("/path/to/vlt-quick", nil):start()
+hs.hotkey.bind({"shift", "cmd"}, "K", function()
+  hs.task.new("/usr/local/bin/vlt-gui", {"--quick"}):start()
 end)
 ```
 
 ### Option 5: Karabiner-Elements
 
-Create a complex modification in
-`~/.config/karabiner/assets/complex_modifications/`:
+Create a complex modification in `~/.config/karabiner/assets/complex_modifications/`:
 
 ```json
 {
-  "title": "Launch vlt-quick",
+  "title": "Launch vlt Quick Access",
   "rules": [
     {
-      "description": "Shift+Cmd+K → vlt-quick",
+      "description": "Shift+Cmd+K → vlt Quick Access",
       "manipulators": [
         {
           "type": "basic",
           "from": {
-            "key_code": "p",
+            "key_code": "k",
             "modifiers": {
               "mandatory": ["left_shift", "left_command"]
             }
           },
           "to": [
             {
-              "shell_command": "/path/to/vlt-quick"
+              "shell_command": "/usr/local/bin/vlt-gui --quick"
             }
           ]
         }
@@ -125,7 +117,6 @@ Create a complex modification in
 
 ## Requirements
 
-- The `vlt` binary must be installed (for daemon auto-start)
-- The `vlt-quick` binary must be on PATH (or in the same directory as `vlt`)
-- macOS: `pbcopy` (built-in)
-- Linux: `xclip` or `wl-clipboard`
+- `vlt-gui` installed (via Homebrew `brew install --cask raynosc/vlt/vlt`, package bundle, or `make build`).
+- macOS: `pbcopy` (built-in).
+- Linux: `xclip` or `wl-clipboard`.

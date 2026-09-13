@@ -32,7 +32,7 @@ This document describes the long-term vision, planned features, and pending work
 
 *   Native `vlt-gui` using Fyne.
 *   Touch ID / Face ID unlock (macOS).
-*   Quick Access popup (`vlt-quick`).
+*   Quick Access popup (`vlt-gui --quick`).
 *   Watchtower dashboard (weak passwords, duplicates, expired certificates).
 *   Glassmorphism dark theme.
 *   Multi-vault support.

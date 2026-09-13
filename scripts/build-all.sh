@@ -28,7 +28,6 @@ BINARIES=(
     "vlt"
     "vlt-gui"
     "vlt-tui"
-    "vlt-quick"
     "vlt-sync"
 )
 

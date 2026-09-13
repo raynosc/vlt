@@ -15,8 +15,8 @@ BUILD_DIR  = .
 CGO_ENABLED = 1
 
 # Binaries
-BINARIES   = vlt vlt-gui vlt-tui vlt-quick vlt-sync
-LINUX_BINS = vlt vlt-tui vlt-quick vlt-sync
+BINARIES   = vlt vlt-gui vlt-tui vlt-sync
+LINUX_BINS = vlt vlt-tui vlt-sync
 
 # Platforms
 PLATFORMS  = darwin/arm64 darwin/amd64
@@ -36,7 +36,6 @@ build:
 	@CGO_ENABLED=$(CGO_ENABLED) $(GOBUILD) -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/vlt      ./cmd/vlt
 	@CGO_ENABLED=$(CGO_ENABLED) $(GOBUILD) -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/vlt-gui   ./cmd/vlt-gui
 	@CGO_ENABLED=$(CGO_ENABLED) $(GOBUILD) -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/vlt-tui  ./cmd/vlt-tui
-	@CGO_ENABLED=$(CGO_ENABLED) $(GOBUILD) -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/vlt-quick ./cmd/vlt-quick
 	@CGO_ENABLED=$(CGO_ENABLED) $(GOBUILD) -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/vlt-sync  ./cmd/vlt-sync
 	@echo "Done → $(BIN_DIR)/"
 
@@ -118,7 +117,7 @@ build-linux:
 
 build-windows:
 	@mkdir -p $(BIN_DIR)
-	@echo "Building Windows binaries (vlt.exe, vlt-gui.exe, vlt-sync.exe, vlt-tui.exe, vlt-quick.exe)..."
+	@echo "Building Windows binaries (vlt.exe, vlt-gui.exe, vlt-sync.exe, vlt-tui.exe)..."
 	@echo -n "  Building vlt.exe (CLI)... "
 	@CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/vlt.exe ./cmd/vlt && echo "✓" || echo "✗"
 	@echo -n "  Building vlt-gui.exe (Desktop GUI)... "
@@ -127,8 +126,6 @@ build-windows:
 	@CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/vlt-sync.exe ./cmd/vlt-sync && echo "✓" || echo "✗"
 	@echo -n "  Building vlt-tui.exe (Terminal UI)... "
 	@CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/vlt-tui.exe ./cmd/vlt-tui && echo "✓" || echo "✗"
-	@echo -n "  Building vlt-quick.exe (Quick Popup)... "
-	@CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/vlt-quick.exe ./cmd/vlt-quick && echo "✓" || echo "✗"
 	@echo "Done → $(BIN_DIR)/*.exe"
 
 # ── Tests ───────────────────────────────────────────────────────────────────
@@ -264,7 +261,7 @@ help:
 	@echo "  🏃 Run Applications Locally:"
 	@echo "    make run-gui        Run desktop GUI application"
 	@echo "    make run-tui        Run interactive terminal UI"
-	@echo "    make run-quick      Run quick search-and-copy floating popup"
+	@echo "    make run-quick      Run quick search-and-copy floating popup (via vlt-gui --quick)"
 	@echo "    make run-cli        Run core CLI"
 	@echo ""
 	@echo "  🧹 Maintenance:"

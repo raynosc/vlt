@@ -11,9 +11,8 @@ A local-first, zero-knowledge secrets and password manager for everyone — from
 | Binary | Description |
 |--------|-------------|
 | `vlt` | CLI for all vault operations |
-| `vlt-gui` | Native GUI (Fyne) with 3-column layout, Watchtower, and dark mode |
+| `vlt-gui` | Native GUI (Fyne) with 3-column layout, Watchtower, dark mode, and `--quick` popup |
 | `vlt-tui` | Terminal UI (Bubble Tea) for CLI lovers |
-| `vlt-quick` | Floating search popup for rapid secret copy |
 | `vlt-sync` | Sync server for cross-device vault sync (see [Deployment Guide](docs/SYNC-DEPLOYMENT.md)) |
 
 ## Installation
@@ -78,7 +77,7 @@ echo -n "my-api-key-value" | ./bin/vlt add ci-token --stdin
 ./bin/vlt-gui
 
 # Run the Quick Access popup
-./bin/vlt-quick
+./bin/vlt-gui --quick
 
 # Run the terminal UI
 ./bin/vlt-tui
@@ -229,7 +228,6 @@ make uninstall-mac
 go install github.com/raynosc/vlt/cmd/vlt@latest
 go install github.com/raynosc/vlt/cmd/vlt-gui@latest
 go install github.com/raynosc/vlt/cmd/vlt-tui@latest
-go install github.com/raynosc/vlt/cmd/vlt-quick@latest
 go install github.com/raynosc/vlt/cmd/vlt-sync@latest
 ```
 

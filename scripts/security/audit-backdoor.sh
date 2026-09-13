@@ -53,9 +53,9 @@ fi
 echo -e "\n${BLUE}[2/6] Auditing Network Isolation Boundaries...${NC}"
 # In vlt, sensitive core packages MUST NEVER import net/http.
 # Allowed packages: internal/sync, internal/syncserver, internal/watchtower, internal/gui (favicons).
-# Strictly FORBIDDEN: internal/crypto, internal/store, internal/secret, internal/tui, internal/quick.
+# Strictly FORBIDDEN: internal/crypto, internal/store, internal/secret, internal/tui.
 
-FORBIDDEN_NET_PACKAGES="internal/crypto internal/store internal/secret internal/tui internal/quick"
+FORBIDDEN_NET_PACKAGES="internal/crypto internal/store internal/secret internal/tui"
 NET_VIOLATIONS=0
 
 for pkg in $FORBIDDEN_NET_PACKAGES; do
@@ -79,7 +79,6 @@ echo -e "\n${BLUE}[3/6] Auditing Process Execution (os/exec)...${NC}"
 # In vlt, os/exec is strictly confined to:
 # - internal/notify (osascript / notify-send)
 # - internal/cli/root.go (detached clipboard auto-clear subprocess)
-# - internal/cli/quick.go (vlt-quick popup launcher)
 # - internal/gui/gui.go (default browser launcher for secret URLs)
 #
 # It is STRICTLY FORBIDDEN in: internal/crypto, internal/store, internal/secret, internal/sync, internal/syncserver

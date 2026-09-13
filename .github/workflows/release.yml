@@ -34,7 +34,6 @@ jobs:
           GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-arm64/vlt ./cmd/vlt
           CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-arm64/vlt-gui ./cmd/vlt-gui
           GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-arm64/vlt-tui ./cmd/vlt-tui
-          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-arm64/vlt-quick ./cmd/vlt-quick
           GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-arm64/vlt-sync ./cmd/vlt-sync
           tar -czvf "dist/vlt_${{ github.ref_name }}_darwin_arm64.tar.gz" -C dist/bin-darwin-arm64 .
 
@@ -42,7 +41,6 @@ jobs:
           GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-amd64/vlt ./cmd/vlt
           CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-amd64/vlt-gui ./cmd/vlt-gui
           GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-amd64/vlt-tui ./cmd/vlt-tui
-          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-amd64/vlt-quick ./cmd/vlt-quick
           GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-darwin-amd64/vlt-sync ./cmd/vlt-sync
           tar -czvf "dist/vlt_${{ github.ref_name }}_darwin_amd64.tar.gz" -C dist/bin-darwin-amd64 .
 
@@ -85,7 +83,6 @@ jobs:
           GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-linux-amd64/vlt ./cmd/vlt
           GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-linux-amd64/vlt-gui ./cmd/vlt-gui
           GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-linux-amd64/vlt-tui ./cmd/vlt-tui
-          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-linux-amd64/vlt-quick ./cmd/vlt-quick
           GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-linux-amd64/vlt-sync ./cmd/vlt-sync
           tar -czvf "dist/vlt_${{ github.ref_name }}_linux_amd64.tar.gz" -C dist/bin-linux-amd64 .
 
@@ -117,7 +114,6 @@ jobs:
           GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-windows-amd64/vlt.exe ./cmd/vlt
           GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -H=windowsgui -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-windows-amd64/vlt-gui.exe ./cmd/vlt-gui
           GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-windows-amd64/vlt-tui.exe ./cmd/vlt-tui
-          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -H=windowsgui -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-windows-amd64/vlt-quick.exe ./cmd/vlt-quick
           GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X github.com/raynosc/vlt/internal/version.Version=${{ github.ref_name }}" -o dist/bin-windows-amd64/vlt-sync.exe ./cmd/vlt-sync
           
           # Compress zip

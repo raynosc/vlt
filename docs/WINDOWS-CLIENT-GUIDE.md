@@ -13,9 +13,8 @@ The project uses pure-Go embedded SQLite (`modernc.org/sqlite`) without CGo depe
 | Binary | Windows Purpose |
 | :--- | :--- |
 | **`vlt.exe`** | CLI for vault management (`add`, `get`, `edit`, `list`, `otp`, `audit`, `sync`). |
-| **`vlt-gui.exe`** | Native desktop GUI (Fyne) with Watchtower, 3-column layout, single-instance IPC, and auto-lock. |
+| **`vlt-gui.exe`** | Native desktop GUI (Fyne) with Watchtower, 3-column layout, single-instance IPC, auto-lock, and `--quick` popup. |
 | **`vlt-tui.exe`** | Interactive Terminal UI in Windows Terminal / PowerShell with multi-vault switching (`Tab`). |
-| **`vlt-quick.exe`** | Floating popup for instantaneous search and clipboard copy with auto-clearing. |
 | **`vlt-sync.exe`** | Synchronization server (if hosted on Windows). |
 
 ### Cross-Compilation from macOS / Linux
@@ -48,7 +47,7 @@ This outputs:
 ## 3. Transfer Files to the Windows Machine
 
 Securely transfer:
-1. Binaries: `vlt.exe`, `vlt-tui.exe`, `vlt-quick.exe`.
+1. Binaries: `vlt.exe`, `vlt-gui.exe`, `vlt-tui.exe`.
 2. Certificates:
    * `ca.pem` (Root CA)
    * `windows-pc.pem` (Client Cert)
@@ -73,7 +72,7 @@ Copy-Item ".\vault.sqlite" "$env:USERPROFILE\.config\passwd\vault.sqlite"
 Copy-Item ".\ca.pem", ".\windows-pc.pem", ".\windows-pc-key.pem" "C:\Tools\vlt\certs\"
 
 # Move binaries to C:\Tools\vlt and add to PATH
-Move-Item ".\vlt.exe", ".\vlt-tui.exe", ".\vlt-quick.exe" "C:\Tools\vlt\"
+Move-Item ".\vlt.exe", ".\vlt-gui.exe", ".\vlt-tui.exe" "C:\Tools\vlt\"
 $env:Path += ";C:\Tools\vlt"
 ```
 
@@ -110,7 +109,7 @@ When changes occur remotely, `vlt` automatically updates and triggers a native W
 
 ### C. Quick Search Popup
 ```powershell
-.\vlt-quick.exe
+.\vlt-gui.exe --quick
 ```
 * Live search and press `Enter` to copy.
 * Auto-clears the clipboard safely after 30 seconds.

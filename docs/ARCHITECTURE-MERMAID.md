@@ -11,17 +11,15 @@ This document contains the comprehensive visual representation of the **`vlt`** 
 ```mermaid
 graph TB
     subgraph CLIENTES ["Client Ecosystem (Cross-platform)"]
-        GUI["vlt-gui (Desktop Fyne v2)<br/>macOS / Linux / Windows"]
+        GUI["vlt-gui (Desktop Fyne v2)<br/>Includes --quick Popup Mode<br/>macOS / Linux / Windows"]
         TUI["vlt-tui (Terminal Bubble Tea)"]
         CLI["vlt (CLI Cobra Engine)"]
-        QUICK["vlt-quick (Spotlight Popup)"]
         DAEMON["vlt daemon (Unix Domain Socket / IPC)"]
         
-        QUICK -->|IPC Socket| DAEMON
-        DAEMON -->|Store & Key| CORE
         GUI -->|Direct Binding| CORE
         TUI -->|Direct Binding| CORE
         CLI -->|Direct Binding| CORE
+        DAEMON -->|Store & Key| CORE
     end
 
     subgraph CORE ["Local Engine and Cryptography (internal/)"]

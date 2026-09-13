@@ -13,9 +13,8 @@ El proyecto utiliza SQLite embebido en Go puro (`modernc.org/sqlite`) sin depend
 | Binario | Propósito en Windows |
 | :--- | :--- |
 | **`vlt.exe`** | CLI para gestión de bóvedas (`add`, `get`, `edit`, `list`, `otp`, `audit`, `sync`). |
-| **`vlt-gui.exe`** | Aplicación de escritorio nativa (Fyne GUI) con Watchtower, 3 columnas, instancia única IPC y bloqueo automático. |
+| **`vlt-gui.exe`** | Aplicación de escritorio nativa (Fyne GUI) con Watchtower, 3 columnas, instancia única IPC, bloqueo automático y popup `--quick`. |
 | **`vlt-tui.exe`** | Terminal UI interactiva en Windows Terminal / PowerShell con cambio de bóveda (`Tab`). |
-| **`vlt-quick.exe`** | Popup flotante para búsqueda instantánea y copia al portapapeles con auto-limpieza. |
 | **`vlt-sync.exe`** | Servidor de sincronización (si se desea ejecutar en Windows). |
 
 ### Compilación desde macOS / Linux
@@ -48,7 +47,7 @@ Esto generará:
 ## 3. Entrega de Archivos al Usuario de Windows
 
 Transfiere de forma segura al equipo Windows:
-1. Los binarios: `vlt.exe`, `vlt-tui.exe`, `vlt-quick.exe`.
+1. Los binarios: `vlt.exe`, `vlt-gui.exe`, `vlt-tui.exe`.
 2. Los certificados:
    * `ca.pem` (Certificado de la Autoridad Certificadora)
    * `windows-pc.pem` (Certificado del cliente)
@@ -75,7 +74,7 @@ Copy-Item ".\vault.sqlite" "$env:USERPROFILE\.config\passwd\vault.sqlite"
 Copy-Item ".\ca.pem", ".\windows-pc.pem", ".\windows-pc-key.pem" "C:\Tools\vlt\certs\"
 
 # Mover binarios a C:\Tools\vlt y agregarlos al PATH
-Move-Item ".\vlt.exe", ".\vlt-tui.exe", ".\vlt-quick.exe" "C:\Tools\vlt\"
+Move-Item ".\vlt.exe", ".\vlt-gui.exe", ".\vlt-tui.exe" "C:\Tools\vlt\"
 $env:Path += ";C:\Tools\vlt"
 ```
 
@@ -110,9 +109,9 @@ Cuando ocurra una modificación en otra máquina, `vlt` descargará los cambios 
 * **Selección de Bóveda**: Presiona **`Tab`** o **`←` / `→`** en la pantalla de desbloqueo para alternar entre bóvedas.
 * **Navegación**: Códigos TOTP en vivo y copia segura al portapapeles.
 
-### C. Búsqueda Rápida (`vlt-quick.exe`)
+### C. Búsqueda Rápida (`vlt-gui.exe --quick`)
 ```powershell
-.\vlt-quick.exe
+.\vlt-gui.exe --quick
 ```
 * Escribe para filtrar en tiempo real.
 * Presiona `Enter` para copiar la contraseña.

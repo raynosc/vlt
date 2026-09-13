@@ -304,7 +304,7 @@ Access the security dashboard from the "shield" icon in the sidebar. It identifi
 *   Secrets without TOTP enabled.
 *   Certificates about to expire.
 
-### Quick Access (`vlt-quick`)
+### Quick Access (`vlt-gui --quick`)
 
 For ultra-fast access:
 1.  Run `./bin/vlt-gui --quick` or activate the popup from the system tray.

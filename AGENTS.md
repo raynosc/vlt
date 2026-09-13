@@ -23,9 +23,8 @@ This file and the `.agents/` directory provide complete architectural context, s
 | Binary | Source | Description |
 | :--- | :--- | :--- |
 | `vlt` | `cmd/vlt/` | Core CLI for all vault operations (`add`, `get`, `edit`, `list`, `import`, `export`, `sync`, `pki`, `otp`, `audit`). |
-| `vlt-gui` | `cmd/vlt-gui/` | Desktop GUI built with Fyne v2 (3-column layout, dark mode, Watchtower, live sync). |
+| `vlt-gui` | `cmd/vlt-gui/` | Desktop GUI built with Fyne v2 (3-column layout, dark mode, Watchtower, live sync; `--quick` for search popup). |
 | `vlt-tui` | `cmd/vlt-tui/` | Terminal UI built with Charm Bubble Tea. |
-| `vlt-quick` | `cmd/vlt-quick/` | Floating search popup for rapid secret copy. |
 | `vlt-sync` | `cmd/vlt-sync/` | Zero-knowledge synchronization server with REST + SSE real-time events. |
 
 ---
@@ -43,9 +42,8 @@ internal/
 ├── parse/         # Universal CSV parser (auto-delimiter, fuzzy header aliases, BOM stripping)
 ├── otp/           # RFC 6238 TOTP/HOTP generator and QR code parser
 ├── watchtower/    # Security audit engine (weak, reused, duplicate, expired, pwned passwords)
-├── gui/           # Fyne v2 desktop frontend
+├── gui/           # Fyne v2 desktop frontend (includes Quick Access popup)
 ├── tui/           # Bubble Tea terminal frontend
-├── quick/         # Compact search-as-you-type popup logic
 ├── daemon/        # Local background Unix domain socket daemon
 ├── keychain/      # OS keychain integration (optional/explicit only)
 ├── config/        # XDG configuration file paths (~/.config/passwd/)
@@ -160,7 +158,7 @@ All AI agents (OpenAI Codex, Claude Code, Cursor, Copilot, Windsurf, Cline, Anti
 ## 8. Architectural Exploration & Impact Analysis (`codebase-memory` MCP)
 
 When using AI agents equipped with Model Context Protocol (MCP) tools (such as `codebase-memory` or `codegraph`):
-1. **Blast-Radius Analysis Before Refactoring**: Before modifying foundational packages (`internal/crypto`, `internal/secret`, `internal/store`), inspect the dependency graph (`get_architecture`, `search_graph`) to map all affected binaries (`cmd/vlt`, `cmd/vlt-gui`, `cmd/vlt-quick`, `cmd/vlt-sync`).
+1. **Blast-Radius Analysis Before Refactoring**: Before modifying foundational packages (`internal/crypto`, `internal/secret`, `internal/store`), inspect the dependency graph (`get_architecture`, `search_graph`) to map all affected binaries (`cmd/vlt`, `cmd/vlt-gui`, `cmd/vlt-tui`, `cmd/vlt-sync`).
 2. **Zeroization Path Tracing (`trace_path`)**: Trace call paths from secret allocation (`crypto.DeriveKey`, `crypto.DecryptAESGCM`) down to consumer routines to ensure `crypto.Zeroize` is called across all return branches.
 3. **Blind Index Integrity Verification**: Use graph searches to confirm that database access exclusively targets `name_lookup` blind indexes and no callers introduce plaintext queries.
 

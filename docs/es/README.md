@@ -11,9 +11,8 @@ Un gestor de contraseñas y secretos local-first y zero-knowledge para todo el m
 | Binario | Descripción |
 |---------|-------------|
 | `vlt` | CLI para todas las operaciones de la bóveda |
-| `vlt-gui` | GUI nativa (Fyne) con diseño de 3 columnas, Watchtower y modo oscuro |
+| `vlt-gui` | GUI nativa (Fyne) con diseño de 3 columnas, Watchtower, modo oscuro y popup `--quick` |
 | `vlt-tui` | Terminal UI (Bubble Tea) interactiva para la consola |
-| `vlt-quick` | Popup flotante de búsqueda rápida para copiar secretos al portapapeles |
 | `vlt-sync` | Servidor de sincronización entre dispositivos (ver [Guía de Despliegue](SYNC-DEPLOYMENT.md)) |
 
 ## Inicio Rápido
@@ -66,7 +65,7 @@ echo -n "mi-api-key" | ./bin/vlt add ci-token --stdin
 ./bin/vlt-gui
 
 # Ejecutar el popup flotante de Quick Access
-./bin/vlt-quick
+./bin/vlt-gui --quick
 
 # Ejecutar la interfaz de terminal interactiva (TUI)
 ./bin/vlt-tui
@@ -223,7 +222,6 @@ make uninstall-mac
 go install github.com/raynosc/vlt/cmd/vlt@latest
 go install github.com/raynosc/vlt/cmd/vlt-gui@latest
 go install github.com/raynosc/vlt/cmd/vlt-tui@latest
-go install github.com/raynosc/vlt/cmd/vlt-quick@latest
 go install github.com/raynosc/vlt/cmd/vlt-sync@latest
 ```
 

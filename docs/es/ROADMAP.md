@@ -32,7 +32,7 @@ Este documento describe la visión a largo plazo, las características planifica
 
 *   `vlt-gui` nativo con Fyne.
 *   Desbloqueo Touch ID / Face ID (macOS).
-*   Quick Access popup (`vlt-quick`).
+*   Quick Access popup (`vlt-gui --quick`).
 *   Dashboard Watchtower (contraseñas débiles, duplicados, certificados expirados).
 *   Tema oscuro glassmorphism.
 *   Multi-vault support.

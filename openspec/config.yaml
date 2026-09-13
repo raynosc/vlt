@@ -6,8 +6,8 @@ context: |
   Architecture: CLI (cobra) + TUI (bubbletea) + GUI (fyne) + sync server
   Storage: SQLite (modernc.org/sqlite), E2E encrypted vault
   Crypto: AES-GCM, PBKDF2, golang.org/x/crypto, go-pkcs12
-  Key packages: cli, tui, gui, sync, syncserver, store, crypto, otp, keychain, daemon, parse, secret, quick, watchtower
-  Binaries: vlt, vlt-gui, vlt-tui, vlt-quick, vlt-sync
+  Key packages: cli, tui, gui, sync, syncserver, store, crypto, otp, keychain, daemon, parse, secret, watchtower
+  Binaries: vlt, vlt-gui, vlt-tui, vlt-sync
   Platform targets: darwin (arm64/amd64), linux (amd64/arm64)
 
 testing:

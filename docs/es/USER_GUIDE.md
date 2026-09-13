@@ -304,7 +304,7 @@ Accede al dashboard de seguridad desde el icono de "escudo" en la barra lateral.
 *   Secretos sin TOTP habilitado.
 *   Certificados próximos a expirar.
 
-### Quick Access (`vlt-quick`)
+### Quick Access (`vlt-gui --quick`)
 
 Para un acceso ultra-rápido:
 1.  Ejecuta `./bin/vlt-gui --quick` o activa el popup desde la bandeja del sistema.

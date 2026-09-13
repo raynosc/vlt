@@ -18,11 +18,11 @@ This directory contains user-facing documentation for the vlt secrets manager.
 | `MOBILE-ROADMAP.md` | Architecture roadmap for upcoming iOS and Android mobile clients. |
 | `ROADMAP.md` | Project vision, version history, planned features, and security issue tracker. |
 | `SYNC_API.md` | API reference for the `vlt-sync` server (endpoints, authentication, SSE events). |
-| `quick-access.md` | Setup guide for the floating search popup (`vlt-quick`). |
+| `quick-access.md` | Setup guide for the floating search popup (`vlt-gui --quick`). |
 
 ## Quick Access
 
-The `vlt-quick` popup is a floating search window for rapid secret lookup and clipboard copy. It's the fastest way to access secrets — designed to be bound to a global hotkey (e.g., `Shift+Cmd+K`).
+The Quick Access popup (`vlt-gui --quick`) is a floating search window for rapid secret lookup and clipboard copy. It's the fastest way to access secrets — designed to be bound to a global hotkey (e.g., `Shift+Cmd+K`).
 
 ### Keybindings
 
@@ -45,25 +45,25 @@ The `vlt-quick` popup is a floating search window for rapid secret lookup and cl
 
 **Recommended — macOS Shortcuts:**
 1. Open **Shortcuts** app → Create new shortcut
-2. Add action: **Run Shell Script** → `/path/to/vlt-quick`
+2. Add action: **Run Shell Script** → `/path/to/vlt-gui --quick`
 3. Info tab → Check **Use as Quick Action**
 4. **System Settings → Keyboard → Keyboard Shortcuts → Services** → assign `Shift+Cmd+K`
 
 **Alternative — Raycast:**
 1. Extensions → Create Script Command
-2. Name: `vlt-quick`, script: `#!/bin/bash /path/to/vlt-quick`
+2. Name: `vlt-quick`, script: `#!/bin/bash /path/to/vlt-gui --quick`
 3. Assign `Shift+Cmd+K` in Raycast settings
 
 ### How It Works
 
-1. `vlt-quick` auto-starts the vlt daemon if not running
-2. If vault is locked, prompts for master password
+1. `vlt-gui --quick` checks for a running GUI instance via local IPC socket or opens directly
+2. If vault is locked, prompts for master password inside the popup
 3. Search bar with live filtering by secret name
-4. Press Enter → copies value to clipboard
-5. Window auto-closes after 1 second showing "Copied!"
+4. Press Enter → copies value to clipboard with auto-clear security
+5. Window auto-closes after copying
 
 ### Requirements
 
-- `vlt-quick` on PATH (or same directory as `vlt`)
+- `vlt-gui` on PATH (or in `/Applications/vlt.app` / same directory as `vlt`)
 - macOS: `pbcopy` (built-in)
 - Linux: `xclip` or `wl-clipboard`

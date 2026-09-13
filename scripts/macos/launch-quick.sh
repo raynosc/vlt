@@ -12,4 +12,4 @@ if [ ! -f "$BIN_PATH" ]; then
 fi
 
 # Ejecutar vlt-gui en modo quick nativo
-exec "$BIN_PATH" -quick "$@"
+exec "$BIN_PATH" --quick "$@"

@@ -32,14 +32,12 @@ A native desktop GUI built with Fyne v2:
 * **Menu Bar / System Tray:** Crisp Retina monochrome icon keeping the process resident in the background when windows are closed.
 * **Watchtower Security Dashboard:** Identifies weak, duplicate, pwned passwords and expiring certificates.
 * **Inline Editing & OTP:** Live TOTP generation with countdowns and brand SVG icons.
+* **Quick Access Mode (`--quick`):** Lightweight floating popup window for rapid secret search and copy without opening the main window, backed by a local IPC socket.
 
 ### 3. `vlt-tui` (Terminal User Interface)
 An interactive terminal interface built with Charm Bubble Tea for keyboard-driven navigation.
 
-### 4. `vlt-quick` (Floating Quick Access Popup)
-A lightweight search popup designed for rapid secret copy without opening the main window.
-
-### 5. `vlt-sync` (Zero-Knowledge Sync Server)
+### 4. `vlt-sync` (Zero-Knowledge Sync Server)
 A self-hosted synchronization server:
 * **Blind State:** The server only sees encrypted blobs (`AES-256-GCM + AAD`), sequence numbers, and vault UUIDs.
 * **Real-time SSE:** Event broadcasting over Server-Sent Events for instant multi-device updates.
@@ -68,7 +66,7 @@ Each secret is encrypted independently:
 
 ## Project Structure
 
-* **`cmd/`:** Entry points for all binaries (`vlt`, `vlt-gui`, `vlt-tui`, `vlt-quick`, `vlt-sync`).
+* **`cmd/`:** Entry points for all binaries (`vlt`, `vlt-gui`, `vlt-tui`, `vlt-sync`).
 * **`internal/`:** Internal packages (`crypto`, `store`, `secret`, `gui`, `tui`, `sync`, `syncserver`, `notify`, `parse`, `otp`, `watchtower`).
 * **`docs/`:** English documentation and `docs/es/` for Spanish documentation.
 * **`scripts/`:** Packaging, installation (`scripts/macos/`), and verification scripts.

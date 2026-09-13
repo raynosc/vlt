@@ -18,7 +18,6 @@ mkdir -p "$DIR/bin"
 CGO_ENABLED=1 go build -ldflags="-s -w" -o "$DIR/bin/vlt-gui" ./cmd/vlt-gui
 CGO_ENABLED=1 go build -ldflags="-s -w" -o "$DIR/bin/vlt" ./cmd/vlt
 go build -ldflags="-s -w" -o "$DIR/bin/vlt-tui" ./cmd/vlt-tui
-go build -ldflags="-s -w" -o "$DIR/bin/vlt-quick" ./cmd/vlt-quick
 go build -ldflags="-s -w" -o "$DIR/bin/vlt-sync" ./cmd/vlt-sync
 
 echo "==> 2. Creando estructura de macOS Bundle ($APP_NAME.app)..."
@@ -29,10 +28,9 @@ mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
 cp "$DIR/bin/vlt-gui" "$MACOS_DIR/$APP_NAME"
 chmod +x "$MACOS_DIR/$APP_NAME"
 
-# Incluir herramientas CLI / TUI / Quick / Sync dentro del bundle
+# Incluir herramientas CLI / TUI / Sync dentro del bundle
 cp "$DIR/bin/vlt" "$MACOS_DIR/vlt-cli"
 cp "$DIR/bin/vlt-tui" "$MACOS_DIR/vlt-tui"
-cp "$DIR/bin/vlt-quick" "$MACOS_DIR/vlt-quick"
 cp "$DIR/bin/vlt-sync" "$MACOS_DIR/vlt-sync"
 chmod +x "$MACOS_DIR"/vlt*
 

@@ -9,7 +9,7 @@
 1. **Local-First y Resiliencia Offline:** La bóveda es una base de datos SQLite local (`vault.sqlite`). Todas las operaciones críticas (cifrado, descifrado, búsqueda ciega) ocurren de forma estrictamente local. La sincronización es un complemento opcional.
 2. **Zero-Knowledge:** Ni el servidor de sincronización ni terceros tienen acceso a las claves de cifrado o secretos en texto plano. El cifrado y descifrado ocurren exclusivamente en el cliente.
 3. **Seguridad por Diseño:** Prácticas criptográficas sólidas desde la base: derivación Argon2id, cifrado autenticado AES-256-GCM, verificación en tiempo constante y borrado de portapapeles mediante tuberías stdin seguras.
-4. **Modularidad y Binarios Especializados:** Binarios independientes (`vlt`, `vlt-gui`, `vlt-tui`, `vlt-quick`, `vlt-sync`) para cada flujo de trabajo.
+4. **Modularidad y Binarios Especializados:** Binarios independientes (`vlt`, `vlt-gui`, `vlt-tui`, `vlt-sync`) para cada flujo de trabajo.
 5. **Extensibilidad:** Soporte para múltiples tipos de secretos (X.509, SSH, PKCS#12, TOTP) con sobre de metadatos extensible en formato JSON.
 
 ## Componentes del Sistema
@@ -23,14 +23,12 @@ Interfaz gráfica construida con Fyne v2:
 * **Atajos Globales Sin Permisos (macOS):** Atajos de sistema (`Shift+Cmd+Space` y `Shift+Cmd+V`) usando la API Carbon `RegisterEventHotKey` (0 permisos de accesibilidad requeridos).
 * **Barra de Menú / Systray:** Icono Retina monocromo que mantiene la aplicación residente en segundo plano.
 * **Dashboard Watchtower:** Análisis de contraseñas débiles, duplicadas y certificados por expirar.
+* **Modo Quick Access (`--quick`):** Buscador flotante emergente para copiar credenciales rápidamente mediante socket IPC local sin abrir la ventana completa.
 
 ### 3. `vlt-tui` (Interfaz de Terminal)
 Interfaz interactiva basada en Charm Bubble Tea.
 
-### 4. `vlt-quick` (Popup Flotante)
-Buscador emergente ultra-rápido para copiar credenciales sin abrir la ventana completa.
-
-### 5. `vlt-sync` (Servidor de Sincronización)
+### 4. `vlt-sync` (Servidor de Sincronización)
 Servidor auto-alojable con eventos SSE en tiempo real y autenticación mTLS Zero-Trust.
 
 ## Modelo de Seguridad

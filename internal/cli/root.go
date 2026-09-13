@@ -145,7 +145,6 @@ CLI and TUI interfaces for managing them.`,
 	root.AddCommand(newTotpCmd())
 	root.AddCommand(newKeychainCmd())
 	root.AddCommand(newLockCmd())
-	root.AddCommand(newQuickCmd())
 	root.AddCommand(newSyncCmd())
 	root.AddCommand(newPINCmd())
 	root.AddCommand(newRecoveryCmd())
@@ -608,7 +607,7 @@ func StartClipboardAutoClear(text string) {
 }
 
 // StartClipboardAutoClearForBinary is like StartClipboardAutoClear but uses
-// the given executable path. Used by sibling binaries (e.g. vlt-quick) that
+// the given executable path. Used by sibling binaries (e.g. vlt-gui, vlt-tui) that
 // know where the main `vlt` binary lives.
 func StartClipboardAutoClearForBinary(exe, text string) {
 	cmd := exec.Command(exe, "__clear-clipboard")
