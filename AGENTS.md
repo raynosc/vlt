@@ -1,7 +1,7 @@
 # AGENTS.md — AI Agent Guidelines & Context for `vlt`
 
 Welcome, Agent. This repository contains **`vlt`**, a production-grade, local-first, zero-knowledge secrets manager written in Go.
-This file and the `.agents/` directory provide complete architectural context, security invariants, package maps, and development workflows so any AI agent (Claude, Cursor, Copilot, OpenCode, Pi, Antigravity) can understand and extend this project safely.
+This file and the `.agents/` directory provide complete architectural context, security invariants, package maps, and development workflows so any AI agent (Codex, Claude, Cursor, Copilot, OpenCode, Windsurf, Cline, Antigravity) can understand and extend this project safely.
 
 ---
 
@@ -111,29 +111,32 @@ make vuln
 # 3. Security AST Scanner (gosec)
 make sec
 
-# 4. Mutation Fuzz Testing Suite
+# 4. Anti-Backdoor & Supply-Chain Boundary Audit
+make audit
+
+# 5. Mutation Fuzz Testing Suite
 make fuzz
 
-# 5. Full Local CI Suite (lint + sec + vuln + tests with race detector)
+# 6. Full Local CI Suite (lint + sec + vuln + audit + tests with race detector)
 make ci
 
-# 6. Build all local platform binaries into bin/
+# 7. Build all local platform binaries into bin/
 make build
 
-# 7. Package macOS Native Bundle (build/vlt.app with Retina .icns)
+# 8. Package macOS Native Bundle (build/vlt.app with Retina .icns)
 make app
 
-# 8. Install/Uninstall macOS Bundle and CLI
+# 9. Install/Uninstall macOS Bundle and CLI
 make install-mac
 make uninstall-mac
 
-# 9. Build cross-platform (darwin arm64/amd64, linux amd64/arm64, windows)
+# 10. Build cross-platform (darwin arm64/amd64, linux amd64/arm64, windows)
 make build-all
 
-# 10. Generate mTLS PKI certificates
+# 11. Generate mTLS PKI certificates
 ./bin/vlt pki generate --out ./certs --hosts "192.168.0.104,localhost" --client "mac-laptop"
 
-# 11. Run Docker sync server locally
+# 12. Run Docker sync server locally
 docker compose up -d
 ```
 
@@ -147,14 +150,23 @@ docker compose up -d
 
 ## 7. Skills & Extended Guides (`.agents/skills/`)
 
-For specialized workflows, check the skills in `.agents/skills/`:
-* [vlt-architecture](file:///.agents/skills/vlt-architecture/SKILL.md) — Deep architectural guide, crypto flow, SQLite schema migrations, and CI quality gates.
-* [vlt-sync-ops](file:///.agents/skills/vlt-sync-ops/SKILL.md) — Deploying, configuring, and testing `vlt-sync` (Docker, Compose, K8s, TLS, SSE).
-* [vlt-security-auditing](file:///.agents/skills/vlt-security-auditing/SKILL.md) — Security rules, memory auditing, and Watchtower checks.
+The `.agents/skills/` directory is the single canonical source of truth for specialized agent skills.
+All AI agents (OpenAI Codex, Claude Code, Cursor, Copilot, Windsurf, Cline, Antigravity) MUST load and follow the corresponding `SKILL.md` before modifying relevant components:
+* [vlt-architecture](.agents/skills/vlt-architecture/SKILL.md) — Deep architectural guide, crypto flow, SQLite schema migrations, and CI quality gates.
+* [vlt-sync-ops](.agents/skills/vlt-sync-ops/SKILL.md) — Deploying, configuring, and testing `vlt-sync` (Docker, Compose, K8s, TLS, SSE).
+* [vlt-security-auditing](.agents/skills/vlt-security-auditing/SKILL.md) — Security rules, memory auditing, Watchtower checks, and anti-patterns.
+
+
+## 8. Architectural Exploration & Impact Analysis (`codebase-memory` MCP)
+
+When using AI agents equipped with Model Context Protocol (MCP) tools (such as `codebase-memory` or `codegraph`):
+1. **Blast-Radius Analysis Before Refactoring**: Before modifying foundational packages (`internal/crypto`, `internal/secret`, `internal/store`), inspect the dependency graph (`get_architecture`, `search_graph`) to map all affected binaries (`cmd/vlt`, `cmd/vlt-gui`, `cmd/vlt-quick`, `cmd/vlt-sync`).
+2. **Zeroization Path Tracing (`trace_path`)**: Trace call paths from secret allocation (`crypto.DeriveKey`, `crypto.DecryptAESGCM`) down to consumer routines to ensure `crypto.Zeroize` is called across all return branches.
+3. **Blind Index Integrity Verification**: Use graph searches to confirm that database access exclusively targets `name_lookup` blind indexes and no callers introduce plaintext queries.
 
 ---
 
-## 8. Mandatory PR Security Review Protocol (Human-in-the-Loop)
+## 9. Mandatory PR Security Review Protocol (Human-in-the-Loop)
 
 When reviewing any Pull Request (PR), whether submitted by external contributors or internal branches, the agent MUST strictly execute this security-first review process:
 

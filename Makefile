@@ -1,4 +1,4 @@
-.PHONY: all build build-signed test test-all build-all build-darwin build-linux build-windows clean fmt lint
+.PHONY: all build build-signed test test-all build-all build-darwin build-linux build-windows clean fmt lint audit sec check ci
 
 # Go parameters
 GOCMD      = go
@@ -200,11 +200,14 @@ fuzz:
 	@$(GOTEST) -fuzz=FuzzParseHIBPResponse -fuzztime=2s ./internal/watchtower
 	@echo "All fuzz tests passed."
 
-check: lint sec test
-	@echo "All local pipeline checks (lint + format + vet + gosec + unit tests) passed."
+audit:
+	@bash scripts/security/audit-backdoor.sh
 
-ci: lint sec vuln test-all
-	@echo "Full CI suite (lint + gosec + vulncheck + tests with race detector) passed."
+check: lint sec audit test
+	@echo "All local pipeline checks (lint + format + vet + gosec + audit + unit tests) passed."
+
+ci: lint sec vuln audit test-all
+	@echo "Full CI suite (lint + gosec + vulncheck + audit + tests with race detector) passed."
 
 # ── Clean ───────────────────────────────────────────────────────────────────
 

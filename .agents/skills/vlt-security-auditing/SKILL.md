@@ -91,3 +91,61 @@ Every PR must be evaluated against this checklist in order:
 ### Phase 3: Human Reporting & Stop Invariant
 - [ ] Present structured summary to the human user (Security Verdict, Functional Verdict, Scan Results).
 - [ ] **STOP AND WAIT**: The agent MUST NEVER approve, merge, or close PRs on GitHub autonomously. Human approval is mandatory.
+
+---
+
+## 7. Anti-Patterns & Negative Constraints (FORBIDDEN)
+
+Any PR or commit containing the following patterns must be rejected:
+
+### ❌ Anti-Pattern 1: Garbage Collection for Secrets (No Zeroize)
+```go
+// VIOLATION: Plaintext key or password left in memory for GC to collect eventually
+func handleKey(masterKey []byte) {
+    doSomething(masterKey)
+    // missing: defer crypto.Zeroize(masterKey)
+}
+
+// VIOLATION: Converting sensitive []byte to immutable Go string
+secretStr := string(secretBytes) // Strings cannot be zeroized in Go runtime!
+```
+**Fix**: Keep sensitive data in `[]byte` and call `defer crypto.Zeroize(buf)`.
+
+### ❌ Anti-Pattern 2: Plaintext Database Queries
+```go
+// VIOLATION: Storing or querying plaintext names in SQLite
+query := "SELECT * FROM secrets WHERE name = ?" // LEAKS METADATA
+```
+**Fix**: Use HMAC-SHA256 blind indexing:
+```go
+lookup := crypto.BlindIndex(masterKey, "passwd.name." + name)
+query := "SELECT * FROM secrets WHERE name_lookup = ?"
+```
+
+### ❌ Anti-Pattern 3: Secrets in Process Table (`argv`)
+```go
+// VIOLATION: Passing secret as command-line flag exposes it to `ps aux` and /proc
+cmd := exec.Command("vlt", "--password", plainPassword)
+```
+**Fix**: Pass secrets exclusively via stdin pipe or masked interactive prompts.
+
+### ❌ Anti-Pattern 4: Non-Constant Time Comparison
+```go
+// VIOLATION: Vulnerable to timing side-channel attacks
+if bytes.Equal(userHMAC, calculatedHMAC) { ... }
+if userToken == expectedToken { ... }
+```
+**Fix**: Use constant-time comparison:
+```go
+if subtle.ConstantTimeCompare(userHMAC, calculatedHMAC) == 1 { ... }
+```
+
+### ❌ Anti-Pattern 5: Missing Cross-Platform Stubs
+```go
+// In feature_darwin.go:
+//go:build darwin
+// Code uses CGo or macOS specific APIs...
+// MISSING: feature_other.go with no-op/fallback stubs!
+```
+**Fix**: Always supply `feature_other.go` with `//go:build !darwin` returning `errors.New("not supported on this platform")` or a safe fallback.
+

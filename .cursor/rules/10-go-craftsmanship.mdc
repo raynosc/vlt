@@ -1,0 +1,26 @@
+---
+description: Go development craftsmanship and security-first engineering guidelines
+globs: *.go
+alwaysApply: false
+---
+
+# Go Craftsmanship & Sec-TDD Invariants
+
+When writing or modifying Go code in `vlt`:
+
+1. **Memory Discipline**:
+   - Zeroize sensitive memory explicitly: `defer crypto.Zeroize(key)` immediately after allocation or retrieval.
+   - Avoid converting `[]byte` secrets to `string` if possible, as strings in Go are immutable and cannot be zeroized.
+
+2. **Timing-Attack Resistance**:
+   - For all hash, key, or token comparisons, use `subtle.ConstantTimeCompare(a, b)` instead of `bytes.Equal` or `==`.
+
+3. **Cross-Platform Compatibility**:
+   - When introducing OS-specific implementations (e.g. `gui_darwin.go`, `notify_linux.go`), always provide stub files for non-supported targets (e.g. `gui_other.go`) to prevent cross-compilation breakage.
+
+4. **Security-Oriented TDD**:
+   - Write failing adversarial tests first (corrupted ciphertexts, altered HMACs, zeroed buffers, invalid nonces).
+   - Verify that functions consuming external input (parsers, sync packets) have fuzz tests (`Fuzz*`).
+
+5. **Quality Verification**:
+   - Always run `make check` locally after editing Go files.

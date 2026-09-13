@@ -136,7 +136,7 @@ Windows users run `vlt.exe` with PowerShell:
 
 ## 7. Kubernetes Deployment
 
-Production manifest is available in [`deploy/k8s/vlt-sync.yaml`](file:///deploy/k8s/vlt-sync.yaml).
+Production manifest is available in [`deploy/k8s/vlt-sync.yaml`](../../../deploy/k8s/vlt-sync.yaml).
 * **Storage**: Single-pod Deployment/StatefulSet with `ReadWriteOnce` PVC for SQLite.
 * **Probes**: `livenessProbe` and `readinessProbe` checking `/healthz`.
 * **Security**: Non-root UID 1000.

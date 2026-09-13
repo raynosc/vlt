@@ -49,6 +49,9 @@ make sec
 # Dependency & Go runtime vulnerability scanner
 make vuln
 
+# Anti-backdoor & supply-chain boundary audit
+make audit
+
 # Mutation fuzz testing suite
 make fuzz
 
@@ -66,14 +69,22 @@ make build-windows
 
 ## 4. Skills & Deep Guides (`.agents/skills/`)
 
-For specialized domain knowledge, consult the skills in `.agents/skills/`:
-- [vlt-architecture](file:///.agents/skills/vlt-architecture/SKILL.md): Core cryptographic flow, SQLite schema v7, and GUI/TUI layers.
-- [vlt-security-auditing](file:///.agents/skills/vlt-security-auditing/SKILL.md): Memory hygiene rules, sanitization, and Watchtower audits.
-- [vlt-sync-ops](file:///.agents/skills/vlt-sync-ops/SKILL.md): `vlt-sync` server operations, mTLS PKI setup, and SSE events.
+The `.agents/skills/` directory is the single canonical source of truth for specialized agent skills. AI agents MUST load and follow the corresponding `SKILL.md` before modifying relevant components:
+- [vlt-architecture](.agents/skills/vlt-architecture/SKILL.md): Core cryptographic flow, SQLite schema v7, and GUI/TUI layers.
+- [vlt-security-auditing](.agents/skills/vlt-security-auditing/SKILL.md): Memory hygiene rules, sanitization, Watchtower audits, and anti-patterns.
+- [vlt-sync-ops](.agents/skills/vlt-sync-ops/SKILL.md): `vlt-sync` server operations, mTLS PKI setup, and SSE events.
 
 ---
 
-## 5. Mandatory PR Security Review Protocol (Human-in-the-Loop)
+## 5. Architectural Exploration via MCP (`codebase-memory`)
+
+When MCP tools are available:
+- **Blast Radius**: Use `codebase-memory` (`get_architecture`, `search_graph`) before modifying core packages (`crypto`, `store`, `secret`).
+- **Call-Path Audits**: Use `trace_path` to verify `crypto.Zeroize` coverage across call chains.
+
+---
+
+## 6. Mandatory PR Security Review Protocol (Human-in-the-Loop)
 
 When evaluating or reviewing any Pull Request:
 1. **Security First**: Verify zero-knowledge invariants (no plaintext in DB/logs/argv), strict memory zeroization (`crypto.Zeroize`), and safe dependencies.

@@ -1,0 +1,25 @@
+---
+description: Critical security and architectural invariants for vlt
+globs: *
+alwaysApply: true
+---
+
+# Core Security Invariants for `vlt`
+
+You are assisting on `vlt`, a production-grade, local-first, zero-knowledge secrets and password manager in Go.
+Every action, suggestion, or code generation MUST adhere to these rules:
+
+1. **Memory Zeroization**:
+   - Any sensitive buffer (`[]byte`) with keys, plaintext passwords, or seeds MUST be actively cleared using `defer crypto.Zeroize(slice)` or `crypto.Zeroize(slice)`.
+   - Never let secrets rely on Go garbage collection.
+
+2. **Zero Knowledge & Blind Indexing**:
+   - Database stores only ciphertext and blind indexes.
+   - Exact lookups use HMAC-SHA256 blind indexing (`name_lookup = HMAC-SHA256(masterKey, "passwd.name." + name)`).
+   - NEVER query plaintext names (e.g. `WHERE name = ?`).
+
+3. **No Argv Secret Passing**:
+   - Never pass secrets via CLI arguments (`argv` / `ps aux`). Use stdin pipes or interactive prompts.
+
+4. **Human-in-the-Loop PR Reviews**:
+   - Never autonomously approve, merge, or close Pull Requests. Always report security and functional audits to the human maintainer first and STOP.
